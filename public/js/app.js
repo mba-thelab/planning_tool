@@ -80,13 +80,33 @@ const App = {
       const res = await fetch('/api/me');
       if (!res.ok) return null;
       this.currentUser = await res.json();
-      // Match to employee roster by email to get role
+
       const global = this.getGlobal();
-      const emp = (global.employees || []).find(e => e.email === this.currentUser.email);
-      this.currentUser.role       = emp ? emp.role       : 'employee';
-      this.currentUser.employeeId = emp ? emp.id         : null;
-      this.currentUser.deptId     = emp ? emp.deptId     : null;
-      // Keep localStorage session in sync for backward compat
+      if (!global.employees) global.employees = [];
+      let emp = global.employees.find(e => e.email === this.currentUser.email);
+
+      // Bootstrap admin: auto-create/promote if email matches ADMIN_EMAIL
+      if (this.currentUser.isBootstrapAdmin) {
+        if (!emp) {
+          emp = { id: uid(), name: this.currentUser.name, email: this.currentUser.email,
+                  role: 'admin', deptId: null, subDeptId: null };
+          global.employees.push(emp);
+          this.saveGlobal(global);
+        } else if (emp.role !== 'admin') {
+          emp.role = 'admin';
+          this.saveGlobal(global);
+        }
+      }
+
+      // First login — redirect to onboarding (skip if already there)
+      if (!emp && window.location.pathname !== '/onboard.html') {
+        window.location.href = '/onboard.html';
+        return null;
+      }
+
+      this.currentUser.role       = emp ? emp.role   : 'employee';
+      this.currentUser.employeeId = emp ? emp.id     : null;
+      this.currentUser.deptId     = emp ? emp.deptId : null;
       this.saveSession({ employeeId: this.currentUser.employeeId, viewMode: this.currentUser.role });
       this._injectUserBar();
       return this.currentUser;
@@ -306,4 +326,8 @@ function closeModal(id) {
 }
 
 // ── AUTO-INIT AUTH on every page ──
-document.addEventListener('DOMContentLoaded', () => App.fetchCurrentUser());
+document.addEventListener('DOMContentLoaded', () => {
+  App.fetchCurrentUser().then(() => {
+    if (typeof window.onUserReady === 'function') window.onUserReady();
+  });
+});

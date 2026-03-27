@@ -9,15 +9,11 @@
 <div class="topbar">
   <a class="logo" href="/">THE/LAB</a>
   <div class="sep"></div>
-  <div class="view-switcher" id="view-switcher">
+  <div class="view-switcher" id="view-switcher" style="display:none">
     <button class="vs-btn" onclick="setViewMode('employee')">Employee</button>
     <button class="vs-btn" onclick="setViewMode('teamleader')">Team Leader</button>
     <button class="vs-btn" onclick="setViewMode('admin')">Admin</button>
   </div>
-  <div class="sep"></div>
-  <select class="name-picker" id="name-picker" onchange="setEmployee(this.value)">
-    <option value="">— Who are you? —</option>
-  </select>
   <div class="tr-right">
     <a href="/settings.html" class="btn ghost" id="settings-link" style="text-decoration:none">⚙ Settings</a>
   </div>
@@ -93,38 +89,43 @@
 
   let session = App.getSession();
 
+  // Called by app.js after fetchCurrentUser completes
+  window.onUserReady = render;
+
   function render() {
     session = App.getSession();
     const {viewMode, employeeId} = session;
+    const u = App.currentUser;
 
-    // View switcher highlight
-    document.querySelectorAll('.vs-btn').forEach((btn, i) => {
-      const modes = ['employee','teamleader','admin'];
-      btn.classList.toggle('active', modes[i] === viewMode);
-    });
+    // View switcher: only show for admins (for role preview)
+    const switcher = document.getElementById('view-switcher');
+    if (u && u.role === 'admin') {
+      switcher.style.display = '';
+      document.querySelectorAll('.vs-btn').forEach((btn, i) => {
+        btn.classList.toggle('active', ['employee','teamleader','admin'][i] === viewMode);
+      });
+    } else {
+      switcher.style.display = 'none';
+    }
 
     // Settings link visibility
     document.getElementById('settings-link').style.display = App.canAccess('settings') ? '' : 'none';
 
-    // Populate name picker
-    const picker = document.getElementById('name-picker');
+    // Greeting — use logged-in user
     const global = App.getGlobal();
     const employees = global.employees || [];
-    picker.innerHTML = '<option value="">— Who are you? —</option>' +
-      employees.map(e => `<option value="${e.id}"${e.id===employeeId?' selected':''}>${esc(e.name)}</option>`).join('');
-
-    // Greeting
     const emp = employees.find(e => e.id === employeeId);
     const greetingEl = document.getElementById('dash-greeting');
     const subEl = document.getElementById('dash-sub');
-    if (emp) {
+    const displayName = u ? u.name.split(' ')[0] : (emp ? emp.name.split(' ')[0] : null);
+    if (displayName) {
       const hour = new Date().getHours();
       const timeGreet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-      greetingEl.textContent = timeGreet + ', ' + emp.name.split(' ')[0] + '.';
+      greetingEl.textContent = timeGreet + ', ' + displayName + '.';
       subEl.textContent = viewMode === 'admin' ? 'Admin view' : viewMode === 'teamleader' ? 'Team Leader view' : 'Employee view';
     } else {
       greetingEl.textContent = 'Welcome to The/Lab';
-      subEl.textContent = 'Select your name and role above to get started.';
+      subEl.textContent = '';
     }
 
     // Tool cards
@@ -334,17 +335,10 @@
     App.saveSession(session);
     render();
   };
-  window.setEmployee = function(id) {
-    session.employeeId = id || null;
-    App.saveSession(session);
-    render();
-  };
   window.toggleEditMessage = toggleEditMessage;
   window.cancelEditMessage = cancelEditMessage;
   window.saveMessage = saveMessage;
   window.openProject = openProject;
-
-  render();
 })();
 </script>
 </body>

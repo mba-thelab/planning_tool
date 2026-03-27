@@ -64,7 +64,11 @@ app.get('/auth/google/callback',
 
 app.get('/api/me', (req, res) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
-  res.json(req.user);
+  const user = { ...req.user };
+  if (process.env.ADMIN_EMAIL && user.email === process.env.ADMIN_EMAIL) {
+    user.isBootstrapAdmin = true;
+  }
+  res.json(user);
 });
 
 app.post('/api/logout', (req, res) => {
