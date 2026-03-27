@@ -176,12 +176,15 @@ function renderEmpList() {
 
 function empRow(emp, dept, global) {
   const subDept = dept ? (dept.subDepts || []).find(s => s.id === emp.subDeptId) : null;
-  const roleClass = emp.role === 'admin' ? 'admin' : emp.role === 'teamleader' ? 'teamleader' : '';
-  const roleLabel = emp.role === 'teamleader' ? 'Team Leader' : emp.role === 'admin' ? 'Admin' : 'Employee';
+  const isAdmin = emp.isAdmin || emp.role === 'admin';
+  const baseRole = emp.role === 'admin' ? 'teamleader' : (emp.role || 'employee');
+  const roleLabel = baseRole === 'teamleader' ? 'Team Leader' : 'Employee';
+  const roleClass = baseRole === 'teamleader' ? 'teamleader' : '';
+  const adminBadge = isAdmin ? `<span class="emp-role admin" style="margin-left:4px">Admin</span>` : '';
   return `<div class="emp-row">
     <div class="emp-name">${esc(emp.name)}</div>
     <div class="emp-dept">${subDept ? esc(subDept.name) : ''}</div>
-    <div class="emp-role ${roleClass}">${roleLabel}</div>
+    <div style="display:flex;align-items:center"><span class="emp-role ${roleClass}">${roleLabel}</span>${adminBadge}</div>
     <button class="btn ghost" style="font-size:11px;padding:3px 8px" onclick="openEmpModal('${emp.id}')">Edit</button>
   </div>`;
 }
@@ -195,7 +198,8 @@ function openEmpModal(empId) {
   document.getElementById('emp-modal-title').textContent = empId ? 'Edit employee' : 'Add employee';
   document.getElementById('emp-name').value  = emp ? emp.name  : '';
   document.getElementById('emp-email').value = emp ? (emp.email || '') : '';
-  document.getElementById('emp-role').value  = emp ? (emp.role || 'employee') : 'employee';
+  document.getElementById('emp-role').value  = emp ? (emp.role === 'admin' ? 'teamleader' : (emp.role || 'employee')) : 'employee';
+  document.getElementById('emp-is-admin').checked = emp ? (emp.isAdmin || emp.role === 'admin') : false;
   document.getElementById('emp-delete-btn').style.display = empId ? '' : 'none';
 
   // Populate dept dropdown
@@ -232,15 +236,16 @@ function saveEmployee() {
   const deptId   = document.getElementById('emp-dept').value    || null;
   const subDeptId= document.getElementById('emp-subdept').value || null;
   const role     = document.getElementById('emp-role').value    || 'employee';
+  const isAdmin  = document.getElementById('emp-is-admin').checked;
 
   const global = App.getGlobal();
   if (!global.employees) global.employees = [];
 
   if (_editingEmpId) {
     const emp = global.employees.find(e => e.id === _editingEmpId);
-    if (emp) { emp.name = name; emp.email = email; emp.deptId = deptId; emp.subDeptId = subDeptId; emp.role = role; }
+    if (emp) { emp.name = name; emp.email = email; emp.deptId = deptId; emp.subDeptId = subDeptId; emp.role = role; emp.isAdmin = isAdmin; }
   } else {
-    global.employees.push({id: uid(), name, email, deptId, subDeptId, role});
+    global.employees.push({id: uid(), name, email, deptId, subDeptId, role, isAdmin});
   }
 
   App.saveGlobal(global);

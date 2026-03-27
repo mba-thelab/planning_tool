@@ -89,25 +89,39 @@ const App = {
       if (this.currentUser.isBootstrapAdmin) {
         if (!emp) {
           emp = { id: uid(), name: this.currentUser.name, email: this.currentUser.email,
-                  role: 'admin', deptId: null, subDeptId: null };
+                  role: 'teamleader', isAdmin: true, deptId: null, subDeptId: null };
           global.employees.push(emp);
           this.saveGlobal(global);
-        } else if (emp.role !== 'admin') {
-          emp.role = 'admin';
+        } else if (!emp.isAdmin && emp.role !== 'admin') {
+          emp.isAdmin = true;
           this.saveGlobal(global);
         }
       }
 
-      // First login — redirect to onboarding (skip if already there)
-      if (!emp && window.location.pathname !== '/onboard.html') {
-        window.location.href = '/onboard.html';
-        return null;
+      // First login — redirect to onboarding (skip if already there, or in test mode)
+      if (!emp) {
+        if (this.getWorkspace() === 'test') {
+          // In test mode, grant admin without onboarding
+          this.currentUser.role    = 'teamleader';
+          this.currentUser.isAdmin = true;
+          this.currentUser.employeeId = null;
+          this.currentUser.deptId  = null;
+          this.saveSession({ employeeId: null, viewMode: 'admin' });
+          this._injectUserBar();
+          return this.currentUser;
+        }
+        if (window.location.pathname !== '/onboard.html') {
+          window.location.href = '/onboard.html';
+          return null;
+        }
       }
 
-      this.currentUser.role       = emp ? emp.role   : 'employee';
+      const isAdmin = emp ? (emp.isAdmin || emp.role === 'admin') : false;
+      this.currentUser.role       = emp ? (emp.role === 'admin' ? 'teamleader' : (emp.role || 'employee')) : 'employee';
+      this.currentUser.isAdmin    = isAdmin;
       this.currentUser.employeeId = emp ? emp.id     : null;
       this.currentUser.deptId     = emp ? emp.deptId : null;
-      this.saveSession({ employeeId: this.currentUser.employeeId, viewMode: this.currentUser.role });
+      this.saveSession({ employeeId: this.currentUser.employeeId, viewMode: isAdmin ? 'admin' : this.currentUser.role });
       this._injectUserBar();
       return this.currentUser;
     } catch(e) { return null; }
@@ -118,16 +132,42 @@ const App = {
     window.location.href = '/login.html';
   },
 
+  // ── WORKSPACE (live / test) ──
+  getWorkspace() {
+    return localStorage.getItem('thelab_workspace') || 'live';
+  },
+  setWorkspace(ws) {
+    localStorage.setItem('thelab_workspace', ws);
+    window.location.reload();
+  },
+  // Prefix storage keys for test workspace
+  _pfx(key) {
+    if (this.getWorkspace() === 'test') {
+      // Don't prefix session, rates, or workspace keys — only data keys
+      return key.replace(/^thelab_(?!workspace|session|rates|settings)/, 'thelab_test_');
+    }
+    return key;
+  },
+  newProjectKey() {
+    return this._pfx('thelab_proj_') + Date.now();
+  },
+
   _injectUserBar() {
     const u = this.currentUser;
     if (!u) return;
-    // Add name + logout to every topbar tr-right
     const right = document.querySelector('.tr-right');
     if (!right || document.getElementById('user-bar')) return;
+    const ws = this.getWorkspace();
+    const wsBtn = u.isAdmin
+      ? (ws === 'test'
+          ? `<span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;background:#3c3489;color:#cecbf6;cursor:pointer;border:1px solid #5a50c0" onclick="App.setWorkspace('live')" title="Click to switch back to live data">TEST MODE</span>`
+          : `<button class="btn ghost" style="font-size:10px;padding:2px 7px" onclick="App.setWorkspace('test')" title="Switch to test data">Test</button>`)
+      : '';
     const bar = document.createElement('div');
     bar.id = 'user-bar';
     bar.style.cssText = 'display:flex;align-items:center;gap:8px;margin-left:4px;padding-left:10px;border-left:1px solid var(--border)';
     bar.innerHTML = `
+      ${wsBtn}
       ${u.avatar ? `<img src="${u.avatar}" style="width:22px;height:22px;border-radius:50%;object-fit:cover">` : ''}
       <span style="font-size:11px;color:var(--text2)">${esc(u.name.split(' ')[0])}</span>
       <button class="btn ghost" style="font-size:11px;padding:3px 8px" onclick="App.logout()">Sign out</button>`;
@@ -170,12 +210,12 @@ const App = {
       },
     };
     try {
-      const stored = JSON.parse(localStorage.getItem('thelab_global') || '{}');
+      const stored = JSON.parse(localStorage.getItem(this._pfx('thelab_global')) || '{}');
       return this._deepMerge(defaults, stored);
     } catch(e) { return defaults; }
   },
   saveGlobal(data) {
-    localStorage.setItem('thelab_global', JSON.stringify(data));
+    localStorage.setItem(this._pfx('thelab_global'), JSON.stringify(data));
   },
 
   // Backward-compat shim — reads old thelab_settings and blends with global
@@ -198,20 +238,21 @@ const App = {
 
   // ── DRAFT (in-progress project across page navigations) ──
   getDraft() {
-    try { return JSON.parse(localStorage.getItem('thelab_draft') || 'null'); }
+    try { return JSON.parse(localStorage.getItem(this._pfx('thelab_draft')) || 'null'); }
     catch(e) { return null; }
   },
   saveDraft(meta, state) {
-    localStorage.setItem('thelab_draft', JSON.stringify({meta, S: state, draftAt: Date.now()}));
+    localStorage.setItem(this._pfx('thelab_draft'), JSON.stringify({meta, S: state, draftAt: Date.now()}));
   },
   clearDraft() {
-    localStorage.removeItem('thelab_draft');
-    localStorage.removeItem('thelab_autosave');
+    localStorage.removeItem(this._pfx('thelab_draft'));
+    localStorage.removeItem(this._pfx('thelab_autosave'));
   },
 
   // ── PROJECTS ──
   getSavedKeys() {
-    return Object.keys(localStorage).filter(k => k.startsWith('thelab_proj_')).sort().reverse();
+    const prefix = this._pfx('thelab_proj_');
+    return Object.keys(localStorage).filter(k => k.startsWith(prefix)).sort().reverse();
   },
   getSavedProjects() {
     return this.getSavedKeys().map(k => {
@@ -255,7 +296,7 @@ const App = {
     copy.S.estimate.sections.forEach(sec => { sec.id = uid(); sec.rows.forEach(r => r.id = uid()); });
     copy.S.process.phases.forEach(ph => { ph.id = uid(); ph.tasks.forEach(t => t.id = uid()); });
     if (copy.S.jobTasks) copy.S.jobTasks = copy.S.jobTasks.map(jt => ({...jt, id: uid()}));
-    const newKey = 'thelab_proj_' + Date.now();
+    const newKey = this.newProjectKey();
     copy.key = newKey;
     localStorage.setItem(newKey, JSON.stringify(copy));
     return newKey;

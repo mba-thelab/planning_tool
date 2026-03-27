@@ -24,7 +24,7 @@ let pendingPush = null;
     Object.assign(projectMeta, draft.meta || {});
     applyMetaToDOM();
   } else {
-    const autosave = (() => { try { return JSON.parse(localStorage.getItem('thelab_autosave') || 'null'); } catch(e) { return null; } })();
+    const autosave = (() => { try { return JSON.parse(localStorage.getItem(App._pfx('thelab_autosave')) || 'null'); } catch(e) { return null; } })();
     if (autosave && autosave.S) {
       Object.assign(S, autosave.S);
       Object.assign(projectMeta, {
@@ -524,13 +524,13 @@ function getPhase(pid)     { return S.process.phases.find(p => p.id === pid); }
 function getPTask(pid, tid) { return getPhase(pid).tasks.find(t => t.id === tid); }
 
 // ── TEMPLATES ──
-function getTemplates() { try { return JSON.parse(localStorage.getItem('thelab_templates') || '[]'); } catch(e) { return []; } }
+function getTemplates() { try { return JSON.parse(localStorage.getItem(App._pfx('thelab_templates')) || '[]'); } catch(e) { return []; } }
 function saveRowAsTemplate(sid, rid) {
   const row = getERow(sid, rid);
   const name = prompt('Template name:', row.what || 'Template'); if (!name) return;
   const templates = getTemplates().filter(t => t.name !== name);
   templates.push({id:uid(), name, row:Object.assign({}, row, {id:undefined, note:''})});
-  localStorage.setItem('thelab_templates', JSON.stringify(templates));
+  localStorage.setItem(App._pfx('thelab_templates'), JSON.stringify(templates));
 }
 function openTemplateModal(sid) {
   _tmplTargetSid = sid;
@@ -561,14 +561,14 @@ function insertTemplate(tid) {
 }
 function deleteTemplate(tid, e) {
   e.stopPropagation();
-  localStorage.setItem('thelab_templates', JSON.stringify(getTemplates().filter(t => t.id !== tid)));
+  localStorage.setItem(App._pfx('thelab_templates'), JSON.stringify(getTemplates().filter(t => t.id !== tid)));
   openTemplateModal(_tmplTargetSid);
 }
 
 // ── SAVE / LOAD ──
 function saveProject() {
   readMetaFromDOM();
-  const key = projectMeta.key || ('thelab_proj_' + Date.now());
+  const key = projectMeta.key || App.newProjectKey();
   projectMeta.key = key;
   App.saveProjectData(key, projectMeta, S);
   document.getElementById('dirty-ind').style.display = 'none';

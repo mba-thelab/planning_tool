@@ -99,7 +99,7 @@
 
     // View switcher: only show for admins (for role preview)
     const switcher = document.getElementById('view-switcher');
-    if (u && u.role === 'admin') {
+    if (u && u.isAdmin) {
       switcher.style.display = '';
       document.querySelectorAll('.vs-btn').forEach((btn, i) => {
         btn.classList.toggle('active', ['employee','teamleader','admin'][i] === viewMode);

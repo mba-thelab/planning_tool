@@ -16,7 +16,7 @@ let pendingJobTask = null; // for "Add to Job Board" modal
     Object.assign(projectMeta, draft.meta || {});
   } else {
     // No draft — check autosave, else blank state
-    const autosave = (() => { try { return JSON.parse(localStorage.getItem('thelab_autosave') || 'null'); } catch(e) { return null; } })();
+    const autosave = (() => { try { return JSON.parse(localStorage.getItem(App._pfx('thelab_autosave')) || 'null'); } catch(e) { return null; } })();
     if (autosave && autosave.S) {
       Object.assign(S, autosave.S);
       Object.assign(projectMeta, {name:autosave.name||'',client:autosave.client||'',version:autosave.version||'V1',date:autosave.date||'',currency:autosave.currency||'DKK'});
@@ -213,7 +213,9 @@ function buildPRow(pid, task) {
   const mh = (parseFloat(task.crew)||0) * (parseFloat(task.hrs)||0);
   const tr = document.createElement('tr');
   tr.draggable = true; tr.dataset.tid = task.id; tr.dataset.pid = pid; tr.id = 'ptr-' + task.id;
-  const assignOpts = (S.assignOpts || []).map(h => `<option${h===task.hold?' selected':''}>${esc(h)}</option>`).join('');
+  const _empNames = (App.getGlobal().employees || []).map(e => e.name);
+  const _allOpts  = [...new Set([...(S.assignOpts || []), ..._empNames])];
+  const assignOpts = _allOpts.map(h => `<option${h===task.hold?' selected':''}>${esc(h)}</option>`).join('');
   const isOnJobBoard = (S.jobTasks || []).some(jt => jt.taskId === task.id);
   tr.innerHTML = `
     <td><div class="move-btns">
@@ -632,7 +634,7 @@ function saveProject() {
   const name = projectMeta.name || 'Untitled';
   const projects = App.getSavedProjects();
   const existing = projects.find(p => p.name === name);
-  const key = (existing && existing._key) || 'thelab_proj_' + Date.now();
+  const key = (existing && existing._key) || App.newProjectKey();
   if (!projectMeta.key) projectMeta.key = key;
   App.saveProjectData(key, projectMeta, S);
   document.getElementById('dirty-ind').style.display = 'none';
