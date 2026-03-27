@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE/LAB — Ét Værktøj</title>
+<style>
+@font-face {
+  font-family: 'TheLabMono';
+  src: url('http://localhost:3000/docs/brand/visual_identity/FONT_THELAB/TheLabMono-Regular.otf') format('opentype');
+  font-weight: 400;
+}
+@font-face {
+  font-family: 'TheLabMono';
+  src: url('http://localhost:3000/docs/brand/visual_identity/FONT_THELAB/TheLabMono-Light.otf') format('opentype');
+  font-weight: 300;
+}
+@font-face {
+  font-family: 'TheLabStencil';
+  src: url('http://localhost:3000/docs/brand/visual_identity/FONT_THELAB/TheLab-Stencil.otf') format('opentype');
+  font-weight: 400;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --black: #0d0d0b;
+  --white: #f7f6f2;
+  --gray1: #e8e7e2;
+  --gray2: #b8b7b0;
+  --gray3: #6e6d68;
+  --accent: #e03d00;
+  --mono: 'TheLabMono', 'Courier New', monospace;
+}
+
+body {
+  font-family: var(--mono);
+  font-weight: 300;
+  background: var(--white);
+  color: var(--black);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── COVER ─── */
+/* ─── TOC ─── */
+.toc-section {
+  background: var(--white);
+  border-bottom: 2px solid var(--black);
+}
+
+.toc-inner {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 64px 80px;
+}
+
+.toc-label {
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 32px;
+}
+
+.toc-list {
+  list-style: none;
+  margin: 0;
+}
+
+.toc-list li {
+  border-bottom: 1px solid var(--gray1);
+}
+
+.toc-list li:first-child {
+  border-top: 1px solid var(--gray1);
+}
+
+.toc-list a {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 14px 0;
+  text-decoration: none;
+  color: var(--black);
+  transition: color 0.1s;
+}
+
+.toc-list a:hover {
+  color: var(--accent);
+}
+
+.toc-item-num {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  min-width: 32px;
+}
+
+.toc-item-label {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 300;
+}
+
+.toc-item-sub {
+  font-size: 11px;
+  font-weight: 300;
+  color: var(--gray3);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ─── COVER ─── */
+.cover {
+  background: var(--black);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 72px 80px;
+}
+
+.cover-logo {
+  font-family: 'TheLabStencil', monospace;
+  font-size: 13px;
+  letter-spacing: 2.5px;
+  color: var(--accent);
+}
+
+.cover-body {
+  max-width: 680px;
+}
+
+.cover-title {
+  font-size: 72px;
+  font-weight: 400;
+  line-height: 1.0;
+  letter-spacing: -0.02em;
+  color: var(--white);
+  margin-bottom: 40px;
+}
+
+.cover-title em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.cover-intro {
+  font-size: 17px;
+  font-weight: 300;
+  color: #6e6d68;
+  line-height: 1.85;
+  max-width: 520px;
+}
+
+.cover-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.cover-meta {
+  font-size: 11px;
+  font-weight: 300;
+  color: #3a3a38;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 2;
+}
+
+.cover-tag {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ─── SECTIONS ─── */
+.section {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 100px 80px;
+}
+
+.section + .section {
+  border-top: 1px solid var(--gray1);
+}
+
+.section.dark {
+  background: var(--black);
+  max-width: none;
+  padding: 100px 0;
+}
+
+.section.dark .inner {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 0 80px;
+}
+
+/* ─── EYEBROW ─── */
+.eyebrow {
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 28px;
+}
+
+/* ─── HEADINGS ─── */
+h2 {
+  font-size: 48px;
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--black);
+  margin-bottom: 36px;
+}
+
+.dark h2 { color: var(--white); }
+
+h3 {
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--black);
+  margin-bottom: 14px;
+  margin-top: 52px;
+}
+
+h3:first-of-type { margin-top: 0; }
+
+/* ─── BODY TEXT ─── */
+p {
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.85;
+  color: var(--black);
+  max-width: 600px;
+  margin-bottom: 24px;
+}
+
+.dark p { color: var(--gray3); max-width: 600px; }
+
+.lead {
+  font-size: 21px;
+  font-weight: 300;
+  line-height: 1.7;
+  color: var(--black);
+  max-width: 620px;
+  margin-bottom: 44px;
+}
+
+/* ─── CALLOUT ─── */
+.callout {
+  border-left: 3px solid var(--accent);
+  padding: 2px 0 2px 28px;
+  margin: 48px 0;
+}
+
+.callout p {
+  font-size: 20px;
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.7;
+  color: var(--black);
+  margin: 0;
+  max-width: none;
+}
+
+/* ─── PLAIN LIST ─── */
+ul.plain {
+  list-style: none;
+  margin: 0 0 28px;
+}
+
+ul.plain li {
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.8;
+  padding-left: 20px;
+  position: relative;
+  color: var(--black);
+  margin-bottom: 10px;
+}
+
+ul.plain li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: var(--gray2);
+}
+
+/* ─── DEPT GRID ─── */
+.dept-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  margin: 40px 0;
+}
+
+.dept-card {
+  background: var(--gray1);
+  padding: 28px 28px 24px;
+}
+
+.dept-card-name {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--black);
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--gray2);
+}
+
+.dept-card-role {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--black);
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.dept-card-desc {
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--gray3);
+  line-height: 1.7;
+}
+
+/* ─── ENTRY POINT ILLUSTRATION ─── */
+.entry-block {
+  margin: 40px 0;
+  background: var(--gray1);
+  padding: 36px 36px 28px;
+}
+
+.entry-label {
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gray3);
+  margin-bottom: 24px;
+}
+
+.entry-flow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  margin-bottom: 16px;
+}
+
+.entry-item {
+  background: var(--white);
+  padding: 16px 14px;
+  text-align: center;
+}
+
+.entry-item-dept {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--black);
+  margin-bottom: 6px;
+}
+
+.entry-item-note {
+  font-size: 10px;
+  font-weight: 300;
+  color: var(--gray3);
+  line-height: 1.5;
+}
+
+.entry-arrow {
+  text-align: center;
+  font-size: 12px;
+  color: var(--gray2);
+  margin: 12px 0;
+}
+
+.entry-center {
+  background: var(--black);
+  padding: 16px 20px;
+  text-align: center;
+}
+
+.entry-center-label {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.entry-center-desc {
+  font-size: 11px;
+  font-weight: 300;
+  color: var(--gray3);
+}
+
+.entry-caption {
+  font-size: 11px;
+  font-weight: 300;
+  color: var(--gray3);
+  font-style: italic;
+  line-height: 1.6;
+}
+
+/* ─── PHASE BLOCKS ─── */
+.phase-list {
+  margin: 44px 0;
+}
+
+.phase-item {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 28px;
+  padding: 36px 0;
+  border-bottom: 1px solid var(--gray1);
+  align-items: start;
+}
+
+.phase-item:first-child {
+  border-top: 2px solid var(--black);
+}
+
+.phase-item:last-child {
+  border-bottom: 2px solid var(--black);
+}
+
+.phase-num {
+  font-size: 36px;
+  font-weight: 400;
+  color: var(--gray1);
+  line-height: 1;
+  padding-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.phase-body {}
+
+.phase-title {
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--black);
+  margin-bottom: 10px;
+}
+
+.phase-who {
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+
+.phase-desc {
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--black);
+  line-height: 1.8;
+  max-width: 500px;
+  margin-bottom: 16px;
+}
+
+.phase-items {
+  list-style: none;
+  margin: 0;
+}
+
+.phase-items li {
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--gray3);
+  padding-left: 16px;
+  position: relative;
+  margin-bottom: 7px;
+  line-height: 1.65;
+}
+
+.phase-items li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: var(--gray2);
+}
+
+/* ─── PRINCIPLES ─── */
+.principle-list {
+  margin: 44px 0;
+}
+
+.principle-item {
+  padding: 28px 0;
+  border-bottom: 1px solid var(--gray1);
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.principle-item:first-child { border-top: 2px solid var(--black); }
+.principle-item:last-child { border-bottom: 2px solid var(--black); }
+
+.principle-title {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--black);
+  padding-top: 2px;
+  line-height: 1.5;
+}
+
+.principle-desc {
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--gray3);
+  line-height: 1.75;
+}
+
+/* ─── CLOSING ─── */
+.closing {
+  background: var(--black);
+  padding: 100px 80px;
+}
+
+.closing-inner {
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.closing h2 {
+  font-size: 48px;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--white);
+  margin-bottom: 36px;
+}
+
+.closing p {
+  font-size: 16px;
+  font-weight: 300;
+  color: var(--gray3);
+  line-height: 1.85;
+  max-width: 580px;
+  margin-bottom: 24px;
+}
+
+.closing-footer {
+  margin-top: 80px;
+  padding-top: 32px;
+  border-top: 1px solid #1e1e1c;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.closing-logo {
+  font-family: 'TheLabStencil', monospace;
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: #3a3a38;
+}
+
+.closing-doc-meta {
+  font-size: 10px;
+  font-weight: 300;
+  color: #2a2a28;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: right;
+  line-height: 2;
+}
+
+@media print {
+  body { background: white; }
+  .cover { page-break-after: always; min-height: 297mm; }
+  .phase-item { page-break-inside: avoid; }
+  .principle-item { page-break-inside: avoid; }
+  .dept-card { page-break-inside: avoid; }
+  @page { margin: 0; size: A4; }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── FORSIDE ─── -->
+<div class="cover">
+  <div class="cover-logo">THE/LAB</div>
+
+  <div class="cover-body">
+    <div class="cover-title">Ét<br><em>værktøj.</em><br>Syv<br>afdelinger.</div>
+    <p class="cover-intro">
+      Et forslag til, hvordan The Lab kan operere fra ét fælles system — hvor alle jobs, uanset hvor de kommer ind, lever ét sted, og alle afdelinger kan se det, de har brug for.
+    </p>
+  </div>
+
+  <div class="cover-footer">
+    <div class="cover-meta">
+      The Lab — Internt<br>
+      Ledelse / Afdelingsledere<br>
+      Marts 2026
+    </div>
+    <div class="cover-tag">Til diskussion</div>
+  </div>
+</div>
+
+<!-- ─── TOC ─── -->
+<div class="toc-section">
+  <div class="toc-inner">
+    <div class="toc-label">Indhold</div>
+    <ul class="toc-list">
+      <li><a href="#situation"><span class="toc-item-num">01</span><span class="toc-item-label">Situationen</span><span class="toc-item-sub">Vi er mere komplekse end vores værktøjer antyder</span></a></li>
+      <li><a href="#idea"><span class="toc-item-num">02</span><span class="toc-item-label">Idéen</span><span class="toc-item-sub">Ét sted, hvor alle jobs lever</span></a></li>
+      <li><a href="#how-we-work"><span class="toc-item-num">03</span><span class="toc-item-label">Hvordan vi arbejder</span><span class="toc-item-sub">Syv afdelinger. Ét job.</span></a></li>
+      <li><a href="#what-it-does"><span class="toc-item-num">04</span><span class="toc-item-label">Hvad det gør</span><span class="toc-item-sub">Et job, fra første kontakt til endelig faktura</span></a></li>
+      <li><a href="#what-it-is-not"><span class="toc-item-num">05</span><span class="toc-item-label">Hvad det ikke er</span><span class="toc-item-sub">Nogle ting der er værd at sige klart</span></a></li>
+      <li><a href="#how-we-build"><span class="toc-item-num">06</span><span class="toc-item-label">Hvordan vi bygger det</span><span class="toc-item-sub">Principperne bag enhver beslutning</span></a></li>
+      <li><a href="#roadmap"><span class="toc-item-num">07</span><span class="toc-item-label">Køreplanen</span><span class="toc-item-sub">Bygget i fire faser</span></a></li>
+      <li><a href="#closing"><span class="toc-item-num">/</span><span class="toc-item-label">Afslutning</span><span class="toc-item-sub">Spørgsmålet er, om vi vil bygge det</span></a></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ─── 01: SITUATIONEN ─── -->
+<div id="situation" class="section">
+  <div class="eyebrow">Situationen</div>
+  <h2>Vi er mere komplekse end vores værktøjer antyder</h2>
+
+  <p class="lead">The Lab er ikke en simpel virksomhed. Vi driver syv afdelinger under ét tag, vi arbejder på tværs af discipliner, som få andre virksomheder kombinerer, og vi gør det i et tempo, hvor kommunikationsfejl har reelle og umiddelbare konsekvenser.</p>
+
+  <p>En kunde ringer til en set-build manager med et byggejob. Det job kræver efterhånden studieplads, en fotograf, catering til tre dages shoot og en lastbil til at flytte sættet. En anden kunde mailer direkte til en producer — en fuld produktion, flere studier, crew fra fire afdelinger. En tredje kunde kontakter rental om udstyr, de vil leje — hvilket ender som et shoot, som Production overtager og Set-build støtter op om.</p>
+
+  <p>Jobs kommer ind fra alle retninger. De krydser afdelingsgrænser som en selvfølge. Og det meste af den koordinering, der holder det hele sammen, foregår via mailkæder, iMessage-grupper, telefonopkald og de implicerede menneskers kollektive hukommelse.</p>
+
+  <div class="callout">
+    <p>Det fungerer — indtil nogen er væk, noget ændrer sig i sidste øjeblik, eller to afdelinger arbejder ud fra forskellige versioner af samme brief.</p>
+  </div>
+
+  <p>Vi har været rigtig gode til at få det til at fungere alligevel. Men det har en pris: tid brugt på at jage information, der allerede burde være delt, beslutninger truffet på et ufuldstændigt grundlag, og den konstante, lavfrekvente friktion ved at drive en sammenhængende virksomhed med adskilte værktøjer.</p>
+</div>
+
+<!-- ─── 02: IDÉEN ─── -->
+<div id="idea" class="section dark">
+  <div class="inner">
+    <div class="eyebrow">Idéen</div>
+    <h2>Ét sted, hvor alle jobs lever</h2>
+
+    <p>Idéen er enkel: ét internt værktøj bygget specifikt til, hvordan The Lab fungerer. Ikke tilpasset fra en generisk projektledelsesplatform. Ikke en lappeløsning bygget oven på noget, der er designet til en anden slags virksomhed. Bygget fra bunden, til os.</p>
+
+    <p>Uanset hvilken afdeling et job kommer igennem — uanset hvem der tager opkaldet eller læser mailen — registreres det i ét system. Fra det tidspunkt kan alle afdelinger, der berører jobbet, se det, de har brug for at se: omfanget, tidslinjen, status, de forespørgsler, der er stillet til dem, og hvad de har forpligtet sig til at levere.</p>
+
+    <p>Målet er ikke at ændre, hvordan vi arbejder. Målet er at give alle et fælles, struktureret overblik over, hvad der foregår — så den koordinering, vi allerede er gode til, bliver hurtigere, klarere og mindre afhængig af, at én person holder al information i hovedet.</p>
+  </div>
+</div>
+
+<!-- ─── 03: HVORDAN VI ARBEJDER ─── -->
+<div id="how-we-work" class="section">
+  <div class="eyebrow">Hvordan vi arbejder</div>
+  <h2>Syv afdelinger.<br>Ét job.</h2>
+
+  <p class="lead">Alle afdelinger i The Lab har to sider: en ledelse og planlægning og en eksekvering. Og alle afdelinger kan være det første kontaktpunkt for et nyt job.</p>
+
+  <p>Det er vigtigt, fordi de fleste værktøjer antager ét enkelt indgangspunkt — en reception, en central koordinator, en fast indtagsproces. Sådan arbejder vi ikke, og det bør vi heller ikke behøve. Et værktøj bygget til The Lab skal afspejle, at et job kan begynde hvor som helst og naturligt flyde hen, hvor det skal hen.</p>
+
+  <div class="entry-block">
+    <div class="entry-label">Et job registreres i systemet, uanset hvor kunden tager kontakt</div>
+    <div class="entry-flow">
+      <div class="entry-item">
+        <div class="entry-item-dept">Booking</div>
+        <div class="entry-item-note">Opkald eller mail — studieforespørgsel, fuld koordinering</div>
+      </div>
+      <div class="entry-item">
+        <div class="entry-item-dept">Production</div>
+        <div class="entry-item-note">Opkald eller mail — direkte til en producer eller PM</div>
+      </div>
+      <div class="entry-item">
+        <div class="entry-item-dept">Set-build</div>
+        <div class="entry-item-note">Opkald eller mail — direkte til en set-build manager</div>
+      </div>
+      <div class="entry-item">
+        <div class="entry-item-dept">Rental</div>
+        <div class="entry-item-note">Opkald eller mail — udstyrforespørgsel, internt eller eksternt</div>
+      </div>
+    </div>
+    <div class="entry-arrow">↓</div>
+    <div class="entry-center">
+      <div class="entry-center-label">Registreres i det fælles system</div>
+      <div class="entry-center-desc">Bliver et job. Synligt for alle, der skal involveres.</div>
+    </div>
+    <div style="height: 16px;"></div>
+    <p class="entry-caption">Den afdeling, der modtager jobbet, registrerer det. Systemet fordeler det. Alle involverede afdelinger ser deres del af det — ikke det hele, kun det, der er relevant for dem.</p>
+  </div>
+
+  <h3>De syv afdelinger</h3>
+
+  <div class="dept-grid">
+    <div class="dept-card">
+      <div class="dept-card-name">Booking</div>
+      <div class="dept-card-role">Central koordinering og studiestyring</div>
+      <div class="dept-card-desc">Styrer studietilgængelighed og planlægning på tværs af alle projekter. Ofte det første kontaktpunkt for større produktioner, men ikke altid. Holder overblikket over, hvad der sker i bygningen til enhver tid.</div>
+    </div>
+    <div class="dept-card">
+      <div class="dept-card-name">Production</div>
+      <div class="dept-card-role">Projektledelse og eksekvering</div>
+      <div class="dept-card-desc">Producere og PM'er med direkte kundekontakt, der håndterer omfang, budget og planlægning — og derefter eksekverer. Fulde produktioner, fotoshoots, kampagner. Planlægning og udførelse er begge i denne afdeling.</div>
+    </div>
+    <div class="dept-card">
+      <div class="dept-card-name">Set-build</div>
+      <div class="dept-card-role">Projektledelse og eksekvering</div>
+      <div class="dept-card-desc">Har sit eget ledelseslag — set-build managers med direkte kundekontakt, der håndterer omfang, estimering, procesplanlægning, 3D-tegning og -rendering, materialeindkøb, leverandørrelationer og underentreprenørkoordinering. Og sit eget eksekveringsteam: konstruktion, maling, installation og nedtagning. En fuld produktionsafdeling i et produktionsselskab.</div>
+    </div>
+    <div class="dept-card">
+      <div class="dept-card-name">Rental / Udstyr</div>
+      <div class="dept-card-role">Udstyrsforvaltning og udlejning</div>
+      <div class="dept-card-desc">Direkte kundekontakt for ekstern udstyrsleje og intern support til produktioner i bygningen. Styrer lager, tilgængelighed og logistik for alt, der går ud og kommer tilbage.</div>
+    </div>
+    <div class="dept-card">
+      <div class="dept-card-name">Assistenter</div>
+      <div class="dept-card-role">On-set support</div>
+      <div class="dept-card-desc">Fotografers og instruktørers assistenter. Planlagt på tværs af shoots, studier og mødetider. Deres arbejde er defineret af andre afdelingers projekter — de har brug for et klart og pålideligt overblik over deres uge.</div>
+    </div>
+    <div class="dept-card">
+      <div class="dept-card-name">Kitchen</div>
+      <div class="dept-card-role">Restaurant, café og produktionscatering</div>
+      <div class="dept-card-desc">Driver en in-house restaurant og café åben for offentligheden til morgenmad og frokost — og leverer samtidig catering til alle produktioner i bygningen. To adskilte driftsgrene, ét team. Til produktioner skal de vide, hvem der er her, hvor mange, hvad de har brug for og hvornår — per job, per dag.</div>
+    </div>
+    <div class="dept-card">
+      <div class="dept-card-name">Administration</div>
+      <div class="dept-card-role">Økonomi og drift</div>
+      <div class="dept-card-desc">Finansielt overblik på tværs af alle projekter og afdelinger. Estimater, omkostninger, fakturering og forbindelsen til E-conomic. Har brug for synlighed over det hele — ikke involvering i den daglige drift, blot et klart finansielt billede.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 04: HVAD DET GØR ─── -->
+<div id="what-it-does" class="section">
+  <div class="eyebrow">Hvad det gør</div>
+  <h2>Et job, fra første kontakt til endelig faktura</h2>
+
+  <p class="lead">Værktøjet følger et jobs fulde liv. Hvert trin er forbundet med det foregående og det næste. Intet tastes ind to gange.</p>
+
+  <p>Når et job kommer ind — gennem en hvilken som helst afdeling — bliver det en post i systemet. Den post indeholder alt, der er relevant for jobbet: hvem kunden er, hvad der produceres, hvilke afdelinger der er involveret, hvad der er scopet og estimeret, hvad hver afdeling er bedt om at levere, hvad status er, og hvor pengene er.</p>
+
+  <p>Hver afdeling ser sit udsnit af den post — i en form, der giver mening for deres arbejde. En set-build manager ser et omfang og et budget. Et set-build crew-medlem ser sine opgaver for ugen. Kitchen ser antal hoveder per dato. Administration ser den finansielle position på tværs af alle aktive jobs.</p>
+
+  <p>Samme job. Forskellige visninger. Én post.</p>
+
+  <h3>Den fulde kæde</h3>
+
+  <ul class="plain">
+    <li><strong>Indtagelse —</strong> En ny forespørgsel registreres. Kunde, groft omfang, involverede afdelinger, datoer til diskussion. Ikke en forpligtelse — blot en registrering af, at samtalen fandt sted.</li>
+    <li><strong>Scoping —</strong> De relevante afdelinger definerer, hvad de er blevet bedt om at gøre. Omfang er struktureret, ikke fritekst. Studier, crew, udstyr, varighed — specificeret, ikke beskrevet.</li>
+    <li><strong>Estimering —</strong> Hver afdeling med en omkostning bygger deres estimat. Det samlede finansielle billede samles ét sted. Production, Set-build, Rental — alle bidrager til ét jobsestimat.</li>
+    <li><strong>Planlægning —</strong> Jobbet nedbrydes i faser og opgaver. Hvem gør hvad, hvornår, hvor. Forespørgsler sendes til de afdelinger, der skal opfylde dem.</li>
+    <li><strong>Eksekvering —</strong> Opgaver er aktive. Status opdateres løbende. Hver afdeling arbejder fra sin egen visning. Booking kan se det fulde billede. En datoændring er synlig for alle, der har brug for at vide det.</li>
+    <li><strong>Afslutning —</strong> Jobbet lukkes. Faktiske tal registreres mod estimatet. Hvad der var planlagt versus hvad der skete. En reference til næste gang.</li>
+    <li><strong>Fakturering —</strong> Det godkendte estimat bliver grundlag for en faktura. Forbundet til E-conomic. Ingen dobbeltindtastning.</li>
+  </ul>
+</div>
+
+<!-- ─── 05: HVAD DET IKKE ER ─── -->
+<div id="what-it-is-not" class="section dark">
+  <div class="inner">
+    <div class="eyebrow">Hvad det ikke er</div>
+    <h2>Nogle ting der er værd at sige klart</h2>
+
+    <p>Dette er ikke et forsøg på at styre mennesker eller måle produktivitet. Der er ingen tidsregistrering. Der er ingen godkendelseskæde, der ikke allerede eksisterer i, hvordan vi arbejder. Værktøjet stoler på, at folk kender deres job.</p>
+
+    <p>Dette er ikke en erstatning for E-conomic. Vores finansielle styring forbliver der. Dette værktøj håndterer det operationelle billede — omfang, planlægning, status, estimater — og forbindes til E-conomic der, hvor de overlapper, for at undgå at taste de samme tal ind to steder.</p>
+
+    <p>Dette er ikke en kommunikationsplatform. Vi erstatter ikke email eller iMessage. Værktøjet gemmer beslutninger og forpligtelser, ikke samtaler. Det, der blev aftalt, registreres. Hvordan man nåede dertil, forbliver der, hvor det skete.</p>
+
+    <p>Og dette er ikke et system, der kun virker, hvis alle bruger det perfekt fra dag ét. Det er designet til at være nyttigt, selv når adoption er delvis — til at starte enkelt og udvides, efterhånden som det beviser sin værdi.</p>
+  </div>
+</div>
+
+<!-- ─── 06: HVORDAN VI BYGGER DET ─── -->
+<div id="how-we-build" class="section">
+  <div class="eyebrow">Hvordan vi bygger det</div>
+  <h2>Principperne bag enhver beslutning</h2>
+
+  <p>Et værktøj som dette kan gå galt på mange måder — for kompliceret, for generisk, for ambitiøst eller for rigid til den måde, tingene faktisk fungerer her. Disse principper eksisterer for at forhindre det.</p>
+
+  <div class="principle-list">
+    <div class="principle-item">
+      <div class="principle-title">Alle afdelinger kan starte et job</div>
+      <div class="principle-desc">Der er ikke ét korrekt indgangspunkt. Et job registreres, uanset hvor det modtages — og systemet fordeler det derfra. Ingen afdeling er en gatekeeper for en anden.</div>
+    </div>
+    <div class="principle-item">
+      <div class="principle-title">Tastes ind én gang, synligt alle relevante steder</div>
+      <div class="principle-desc">Information om et job registreres én gang og deles med alle afdelinger, der har brug for det. Ingen taster det ind, som en anden allerede har givet. Kæden fra indtagelse til faktura er ubrudt.</div>
+    </div>
+    <div class="principle-item">
+      <div class="principle-title">Hver afdeling ser kun det, der er relevant for dem</div>
+      <div class="principle-desc">Kitchen behøver ikke læse et estimat. En assistent behøver ikke se den fulde procesplan. Alle får en visning tilpasset deres arbejde — klar, ikke rodet.</div>
+    </div>
+    <div class="principle-item">
+      <div class="principle-title">Bygningen er bygget ind</div>
+      <div class="principle-desc">Studier, etager, udstyr og lokationer er ikke fritekstfelter — de er reelle enheder i systemet. Studie 3 er Studie 3. Den fysiske virkelighed i bygningen er en del af datamodellen.</div>
+    </div>
+    <div class="principle-item">
+      <div class="principle-title">Hurtigt nok til en shootdag</div>
+      <div class="principle-desc">Testen for enhver funktion: kan nogen få det, de har brug for, på ti sekunder, på en telefon, i et travlt studie? Hvis ikke, er det ikke færdigt. Hastighed og klarhed er ikke valgfrit i et fysisk produktionsmiljø.</div>
+    </div>
+    <div class="principle-item">
+      <div class="principle-title">Enkelt fra start, bygget til at vokse</div>
+      <div class="principle-desc">Vi behøver ikke bygge alt på én gang. Vi starter med det, der leverer mest værdi med det samme, og udvider bevidst. Hver fase er nyttig i sig selv — og et fundament for den næste.</div>
+    </div>
+    <div class="principle-item">
+      <div class="principle-title">Det afspejler, hvordan vi faktisk arbejder</div>
+      <div class="principle-desc">Intet værktøj overlever mødet med virkeligheden, hvis det er designet til en anden virkelighed. Alle beslutninger om, hvordan dette fungerer, vil blive truffet af mennesker, der forstår, hvad der sker i denne bygning — ikke af et softwarefirma, der aldrig har været her.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 07: KØREPLANEN ─── -->
+<div id="roadmap" class="section">
+  <div class="eyebrow">Køreplanen</div>
+  <h2>Bygget i fire faser</h2>
+
+  <p>Planen er ikke at bygge alt på én gang og håbe, at det virker. Det er at bygge i rækkefølge — startende med det, der er mest værdifuldt og mest brugt, og udvide efterhånden som hvert lag beviser sin nytte.</p>
+
+  <div class="phase-list">
+    <div class="phase-item">
+      <div class="phase-num">01</div>
+      <div class="phase-body">
+        <div class="phase-title">Fundament — jobs, estimater og procesplanlægning</div>
+        <div class="phase-who">Production / Set-build / Booking</div>
+        <p class="phase-desc">En struktureret måde at modtage et job, scope det, estimere det og planlægge det. Hvert job har en status. Pipeline er synlig. Planlægning og økonomi er forbundet.</p>
+        <ul class="phase-items">
+          <li>Jobindtagelse — alle afdelinger kan registrere en ny forespørgsel eller et nyt job</li>
+          <li>Projektstatus: Forespørgsel / Aktiv / I produktion / Leveret / Faktureret</li>
+          <li>Estimat — omfang og omkostninger per afdeling, samlet til ét jobsestimat</li>
+          <li>Procesplan — faser, opgaver, crew, tidslinje</li>
+          <li>Pipelinevisning — alle aktive jobs efter status</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-item">
+      <div class="phase-num">02</div>
+      <div class="phase-body">
+        <div class="phase-title">Alle afdelinger i systemet</div>
+        <div class="phase-who">Kitchen / Rental / Assistenter / Alle afdelinger</div>
+        <p class="phase-desc">Alle afdelinger har en visning, der er relevant for deres arbejde. Cateringordrer, udstyrforespørgsler, assistentplanlægning — alt forbundet til de jobs, det tilhører.</p>
+        <ul class="phase-items">
+          <li>Cateringordrer per job: dato, sted, antal, måltidstype</li>
+          <li>Udstyrforespørgsler: hvad der sendes ud, hvornår, til hvilket job</li>
+          <li>Assistentplan: shootdage, studier, mødetider, udstyr — per uge</li>
+          <li>Afdelingsspecifikke opgavevisninger — hvert team ser sin egen kø</li>
+          <li>Forespørgsler på tværs af afdelinger: formelle anmodninger med status</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-item">
+      <div class="phase-num">03</div>
+      <div class="phase-body">
+        <div class="phase-title">Ressourcer — studier, udstyr, crew</div>
+        <div class="phase-who">Booking / Rental / Alle afdelingsledere</div>
+        <p class="phase-desc">Bygningens ressourcer kan bookes i systemet. Studietilgængelighed er synlig. Udstyrslageret styres. Crew-kapacitet kan spores.</p>
+        <ul class="phase-items">
+          <li>Studiekalender: reservationer knyttet til jobs, forebyggelse af dobbeltbookinger</li>
+          <li>Udstyrslagerbeholdning: tilgængelighed på tværs af alle aktive jobs</li>
+          <li>Crew-kapacitet: tildelt arbejde versus tilgængeligt antal per afdeling</li>
+          <li>Logistik: leverancer, køretøjsbrug, materialeflytninger</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-item">
+      <div class="phase-num">04</div>
+      <div class="phase-body">
+        <div class="phase-title">Finansiel afslutning — faktiske tal, fakturering og E-conomic</div>
+        <div class="phase-who">Administration / Production / Set-build</div>
+        <p class="phase-desc">Luk cirklen mellem det, der blev planlagt, og det, der blev brugt. Forbind til E-conomic for at reducere dobbeltindtastning. Giv Administration det finansielle overblik, de har brug for på tværs af alle jobs.</p>
+        <ul class="phase-items">
+          <li>Faktisk omkostningssporing versus estimat — delta synligt mens jobbet kører</li>
+          <li>Fakturagenering fra det godkendte estimat</li>
+          <li>E-conomic-integration — finansielle data flyder, tastes ikke ind igen</li>
+          <li>Leverandørdatabase: eksterne virksomheder, priser, historik</li>
+          <li>Jobafslutning: faktiske tal versus planlagte, noter til næste gang</li>
+          <li>Finansielt overblik: omsætning per jobtype, margin, kapacitetsudnyttelse</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── AFSLUTNING ─── -->
+<div id="closing" class="closing">
+  <div class="closing-inner">
+    <h2>Det har været<br>muligt i et stykke tid.<br>Vi har bare ikke bygget det.</h2>
+
+    <p>Alle afdelinger i The Lab har mærket friktionen ved at drive en sammenhængende virksomhed med adskilte værktøjer. Vi har klaret os — fordi menneskerne her er gode til at få tingene til at fungere. Men der findes en bedre version af dette, og den er ikke svær at beskrive.</p>
+
+    <p>Ét sted, hvor alle jobs lever. Alle afdelinger med en visning, der er nyttig for dem. Information tastet ind én gang og delt overalt, hvor der er brug for den. Et finansielt billede, der altid er opdateret. Et system, der afspejler, hvordan denne virksomhed faktisk fungerer.</p>
+
+    <p>Dette er et forslag til det system. Planen er at bygge det i faser, startende med det, der betyder mest. Den første fase er noget, vi hurtigt kan have kørende. Hver fase efter det er et valg, vi træffer sammen baseret på, hvor den største værdi er.</p>
+
+    <p>Spørgsmålet er ikke, om det ville være nyttigt. Spørgsmålet er, om vi vil bygge det.</p>
+
+    <div class="closing-footer">
+      <div class="closing-logo">THE/LAB</div>
+      <div class="closing-doc-meta">
+        Internt — Til diskussion<br>
+        Marts 2026
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
