@@ -729,7 +729,7 @@ function saveExportOpts() {
 
 async function callPDF(html, suffix) {
   readMetaFromDOM();
-  const name = (projectMeta.name || 'project').replace(/\s+/g,'-').toLowerCase();
+  const name = (projectMeta.name || 'project').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase();
   const filename = `thelab-${name}-${suffix}`;
   try {
     const res = await fetch('/api/pdf', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({html, filename})});
