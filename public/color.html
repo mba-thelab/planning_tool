@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The/Lab — Color Converter</title>
+<link rel="stylesheet" href="/css/style.css">
+<style>
+.cc-wrap{max-width:600px;margin:0 auto;padding:32px 20px}
+.cc-input{width:100%;box-sizing:border-box;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:14px;font-family:monospace;color:var(--hi);outline:none;transition:border-color .15s}
+.cc-input:focus{border-color:var(--text2)}
+.cc-swatch{width:100%;height:90px;border-radius:8px;border:1px solid var(--border);margin:12px 0 4px;transition:background .2s;display:flex;align-items:flex-end;padding:8px 12px;box-sizing:border-box}
+.cc-rgb{font-size:11px;color:var(--text3);margin-bottom:16px;font-family:monospace;min-height:16px}
+.cc-results{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px}
+.cc-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px}
+.cc-card-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:10px}
+.cc-match{display:flex;gap:10px;align-items:flex-start}
+.cc-match-swatch{width:52px;height:52px;border-radius:6px;border:1px solid var(--border);flex-shrink:0}
+.cc-code{font-size:15px;font-weight:700;color:var(--hi);line-height:1.2}
+.cc-name{font-size:11px;color:var(--text2);margin-top:2px}
+.cc-de{font-size:10px;margin-top:5px}
+.cc-de-badge{display:inline-block;padding:2px 7px;border-radius:20px;font-weight:600}
+.cc-de-excellent{background:#083018;color:#9fe1cb}
+.cc-de-good{background:#082830;color:#b5d4f4}
+.cc-de-approx{background:#2c2806;color:#fac775}
+.cc-de-distant{background:#2a0c0c;color:#f5c4b3}
+.cc-copy{margin-top:8px;font-size:10px;padding:3px 9px;background:none;border:1px solid var(--border);border-radius:4px;color:var(--text2);cursor:pointer;transition:all .15s}
+.cc-copy:hover{border-color:var(--text2);color:var(--hi)}
+.cc-copy.copied{color:#9fe1cb;border-color:#9fe1cb}
+.cc-error{font-size:12px;color:#f09595;min-height:16px;margin-bottom:4px}
+.cc-disclaimer{font-size:11px;color:var(--text3);margin-top:20px;padding-top:16px;border-top:1px solid var(--bg3)}
+.cc-formats{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.cc-fmt{font-size:10px;padding:2px 8px;border-radius:4px;background:var(--bg3);color:var(--text3);font-family:monospace}
+@media(max-width:500px){.cc-results{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a class="logo" href="/">THE/LAB</a>
+  <div class="sep"></div>
+  <span style="font-size:12px;color:var(--text2)">Color Converter</span>
+  <div class="tr-right">
+    <a href="/" class="btn ghost">← Dashboard</a>
+  </div>
+</div>
+
+<div style="overflow-y:auto;height:calc(100vh - 52px)">
+<div class="cc-wrap">
+
+  <div style="margin-bottom:24px">
+    <div style="font-size:18px;font-weight:600;color:var(--hi);margin-bottom:4px">Color Converter</div>
+    <div style="font-size:12px;color:var(--text2)">Paste any color — get the nearest RAL Classic and NCS code.</div>
+  </div>
+
+  <div class="cc-formats">
+    <span class="cc-fmt">#A3C7D4</span>
+    <span class="cc-fmt">rgb(163, 199, 212)</span>
+    <span class="cc-fmt">0, 20, 12, 17 (CMYK)</span>
+    <span class="cc-fmt">2728 C (Pantone)</span>
+  </div>
+
+  <input class="cc-input" id="cc-input" placeholder="Paste HEX, RGB, CMYK or Pantone…" oninput="onInput()" autocomplete="off" spellcheck="false">
+  <div class="cc-error" id="cc-error"></div>
+
+  <div class="cc-swatch" id="cc-swatch" style="background:var(--bg3)">
+    <span id="cc-swatch-label" style="font-size:11px;color:rgba(255,255,255,0.4);font-family:monospace"></span>
+  </div>
+  <div class="cc-rgb" id="cc-rgb"></div>
+
+  <div class="cc-results" id="cc-results" style="display:none">
+    <div class="cc-card">
+      <div class="cc-card-title">Nearest RAL Classic</div>
+      <div class="cc-match">
+        <div class="cc-match-swatch" id="ral-swatch"></div>
+        <div>
+          <div class="cc-code" id="ral-code"></div>
+          <div class="cc-name" id="ral-name"></div>
+          <div class="cc-de" id="ral-de"></div>
+          <button class="cc-copy" id="ral-copy" onclick="copyCode('ral-code','ral-copy')">Copy code</button>
+        </div>
+      </div>
+    </div>
+    <div class="cc-card">
+      <div class="cc-card-title">Nearest NCS</div>
+      <div class="cc-match">
+        <div class="cc-match-swatch" id="ncs-swatch"></div>
+        <div>
+          <div class="cc-code" id="ncs-code"></div>
+          <div class="cc-name" id="ncs-name" style="color:var(--text3);font-size:10px"></div>
+          <div class="cc-de" id="ncs-de"></div>
+          <button class="cc-copy" id="ncs-copy" onclick="copyCode('ncs-code','ncs-copy')">Copy code</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cc-disclaimer">
+    Matches are approximations based on sRGB values. Physical paint colours will vary — always verify with a physical swatch before use.
+  </div>
+
+</div>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+window.onUserReady = function(){};
+
+// ─────────────────────────────────────────
+// RAL CLASSIC DATABASE [code, name, r, g, b]
+// ─────────────────────────────────────────
+const RAL_DB = [
+  [1000,'Green beige',205,186,136],[1001,'Beige',215,192,145],[1002,'Sand yellow',217,192,118],
+  [1003,'Signal yellow',249,214,0],[1004,'Golden yellow',238,186,0],[1005,'Honey yellow',207,166,0],
+  [1006,'Maize yellow',228,174,0],[1007,'Daffodil yellow',232,173,0],[1011,'Brown beige',175,142,78],
+  [1012,'Lemon yellow',227,203,45],[1013,'Oyster white',234,226,191],[1014,'Ivory',225,210,161],
+  [1015,'Light ivory',233,222,185],[1016,'Sulfur yellow',243,218,11],[1017,'Saffron yellow',252,184,0],
+  [1018,'Zinc yellow',252,217,0],[1019,'Grey beige',167,147,109],[1020,'Olive yellow',165,154,89],
+  [1021,'Rapeseed yellow',246,196,0],[1023,'Traffic yellow',249,197,0],[1024,'Ochre yellow',185,150,61],
+  [1026,'Luminous yellow',255,255,0],[1027,'Curry',160,137,0],[1028,'Melon yellow',249,182,0],
+  [1032,'Broom yellow',228,175,0],[1033,'Dahlia yellow',242,158,0],[1034,'Pastel yellow',237,170,88],
+  [1037,'Sun yellow',241,167,0],
+  [2000,'Yellow orange',218,140,0],[2001,'Red orange',182,70,25],[2002,'Vermillion',186,56,23],
+  [2003,'Pastel orange',248,135,54],[2004,'Pure orange',231,96,0],[2005,'Luminous orange',255,69,0],
+  [2007,'Luminous bright orange',255,184,41],[2008,'Bright red orange',239,121,54],
+  [2009,'Traffic orange',221,85,0],[2010,'Signal orange',209,92,40],[2011,'Deep orange',227,111,0],
+  [2012,'Salmon orange',209,102,73],[2013,'Pearl orange',158,80,48],
+  [3000,'Flame red',176,41,23],[3001,'Signal red',169,33,27],[3002,'Carmine red',164,36,29],
+  [3003,'Ruby red',142,23,21],[3004,'Purple red',110,22,24],[3005,'Wine red',79,21,22],
+  [3007,'Black red',53,19,22],[3009,'Oxide red',100,40,33],[3011,'Brown red',127,37,30],
+  [3012,'Beige red',204,134,114],[3013,'Tomato red',160,45,30],[3014,'Antique pink',215,126,123],
+  [3015,'Light pink',229,168,168],[3016,'Coral red',171,59,43],[3017,'Rose',209,84,93],
+  [3018,'Strawberry red',201,61,72],[3020,'Traffic red',194,24,23],[3022,'Salmon pink',212,99,81],
+  [3024,'Luminous red',255,15,0],[3026,'Luminous bright red',255,33,0],[3027,'Raspberry red',175,22,60],
+  [3028,'Pure red',202,32,38],[3031,'Orient red',168,44,46],[3032,'Pearl ruby red',115,30,34],
+  [3033,'Pearl pink',194,83,84],
+  [4001,'Red lilac',130,92,132],[4002,'Red violet',140,65,87],[4003,'Heather violet',190,96,143],
+  [4004,'Claret violet',106,27,79],[4005,'Blue lilac',117,104,153],[4006,'Traffic purple',157,34,131],
+  [4007,'Purple violet',68,32,73],[4008,'Signal violet',143,73,153],[4009,'Pastel violet',170,135,158],
+  [4010,'Telemagenta',199,58,122],[4011,'Pearl violet',98,79,119],[4012,'Pearl blackberry',95,100,130],
+  [5000,'Violet blue',31,73,118],[5001,'Green blue',0,79,104],[5002,'Ultramarine blue',0,43,127],
+  [5003,'Sapphire blue',10,55,90],[5004,'Black blue',12,24,47],[5005,'Signal blue',0,68,142],
+  [5007,'Brilliant blue',53,101,143],[5008,'Grey blue',42,67,83],[5009,'Azure blue',0,91,127],
+  [5010,'Gentian blue',0,63,135],[5011,'Steel blue',26,48,73],[5012,'Light blue',42,140,176],
+  [5013,'Cobalt blue',30,49,107],[5014,'Pigeon blue',91,119,151],[5015,'Sky blue',2,113,163],
+  [5017,'Traffic blue',0,82,136],[5018,'Turquoise blue',0,140,143],[5019,'Capri blue',0,88,127],
+  [5020,'Ocean blue',0,68,80],[5021,'Water blue',0,117,129],[5022,'Night blue',15,26,79],
+  [5023,'Distant blue',62,96,133],[5024,'Pastel blue',93,147,173],[5025,'Pearl gentian blue',36,100,130],
+  [5026,'Pearl night blue',18,40,79],
+  [6000,'Patina green',56,117,93],[6001,'Emerald green',38,116,55],[6002,'Leaf green',41,107,45],
+  [6003,'Olive green',74,88,55],[6004,'Blue green',0,73,67],[6005,'Moss green',0,72,50],
+  [6006,'Grey olive',56,62,40],[6007,'Bottle green',42,57,37],[6008,'Brown green',52,56,40],
+  [6009,'Fir green',29,58,42],[6010,'Grass green',53,116,52],[6011,'Reseda green',118,143,100],
+  [6012,'Black green',40,57,50],[6013,'Reed green',124,130,99],[6014,'Yellow olive',78,81,58],
+  [6015,'Black olive',55,57,50],[6016,'Turquoise green',0,126,99],[6017,'May green',76,147,62],
+  [6018,'Yellow green',87,165,47],[6019,'Pastel green',181,215,164],[6020,'Chrome green',49,71,43],
+  [6021,'Pale green',143,175,132],[6022,'Olive drab',71,68,49],[6024,'Traffic green',0,127,86],
+  [6025,'Fern green',84,125,66],[6026,'Opal green',0,104,80],[6027,'Light green',124,193,187],
+  [6028,'Pine green',44,83,65],[6029,'Mint green',0,122,58],[6032,'Signal green',0,146,73],
+  [6033,'Mint turquoise',66,146,135],[6034,'Pastel turquoise',127,181,181],[6035,'Pearl green',30,106,55],
+  [6036,'Pearl opal green',0,102,86],[6037,'Pure green',0,160,54],[6038,'Luminous green',0,255,0],
+  [7000,'Squirrel grey',122,134,139],[7001,'Silver grey',142,151,154],[7002,'Olive grey',126,127,107],
+  [7003,'Moss grey',122,121,106],[7004,'Signal grey',155,155,155],[7005,'Mouse grey',107,109,107],
+  [7006,'Beige grey',120,116,100],[7008,'Khaki grey',110,104,77],[7009,'Green grey',87,90,82],
+  [7010,'Tarpaulin grey',83,86,80],[7011,'Iron grey',75,82,87],[7012,'Basalt grey',87,94,97],
+  [7013,'Brown grey',92,88,76],[7015,'Slate grey',70,76,83],[7016,'Anthracite grey',47,54,60],
+  [7021,'Black grey',36,38,37],[7022,'Umbra grey',61,60,57],[7023,'Concrete grey',130,130,122],
+  [7024,'Graphite grey',63,68,74],[7026,'Granite grey',49,60,63],[7030,'Stone grey',148,148,138],
+  [7031,'Blue grey',79,91,99],[7032,'Pebble grey',184,184,169],[7033,'Cement grey',123,128,116],
+  [7034,'Yellow grey',143,141,118],[7035,'Light grey',211,213,209],[7036,'Platinum grey',146,141,136],
+  [7037,'Dusty grey',127,127,127],[7038,'Agate grey',182,182,177],[7039,'Quartz grey',104,104,101],
+  [7040,'Window grey',155,163,166],[7042,'Traffic grey A',141,145,141],[7043,'Traffic grey B',79,82,79],
+  [7044,'Silk grey',200,199,193],[7045,'Telegrey 1',144,148,153],[7046,'Telegrey 2',127,132,137],
+  [7047,'Telegrey 4',200,203,203],[7048,'Pearl mouse grey',116,116,109],
+  [8000,'Green brown',136,107,67],[8001,'Ochre brown',152,109,54],[8002,'Signal brown',121,83,67],
+  [8003,'Clay brown',154,95,44],[8004,'Copper brown',164,87,54],[8007,'Fawn brown',122,90,55],
+  [8008,'Olive brown',122,92,46],[8011,'Nut brown',101,68,41],[8012,'Red brown',108,57,39],
+  [8014,'Sepia brown',73,53,41],[8015,'Chestnut brown',103,52,37],[8016,'Mahogany brown',87,42,32],
+  [8017,'Chocolate brown',72,48,40],[8019,'Grey brown',71,59,54],[8022,'Black brown',28,20,17],
+  [8023,'Orange brown',162,92,40],[8024,'Beige brown',150,101,63],[8025,'Pale brown',127,101,82],
+  [8028,'Terra brown',90,67,47],[8029,'Pearl copper',118,69,47],
+  [9001,'Cream',250,244,225],[9002,'Grey white',231,228,218],[9003,'Signal white',244,244,244],
+  [9004,'Signal black',40,40,40],[9005,'Jet black',12,12,12],[9006,'White aluminium',166,168,167],
+  [9007,'Grey aluminium',136,133,131],[9010,'Pure white',255,255,255],[9011,'Graphite black',28,29,31],
+  [9012,'Clean room white',245,246,240],[9016,'Traffic white',248,249,246],[9017,'Traffic black',29,28,27],
+  [9018,'Papyrus white',212,213,207],[9022,'Pearl light grey',147,150,152],[9023,'Pearl dark grey',121,123,126],
+].map(([code,name,r,g,b]) => ({code:`RAL ${code}`, name, rgb:[r,g,b]}));
+
+// ─────────────────────────────────────────
+// PANTONE DATABASE {key: [r,g,b]}
+// ─────────────────────────────────────────
+const PANTONE_DB = {
+  'PROCESS YELLOW C':[251,218,0],'PROCESS MAGENTA C':[206,0,88],'PROCESS CYAN C':[0,162,218],
+  'BLACK C':[44,44,44],'WHITE':[255,255,255],'RED 032 C':[240,59,32],'WARM RED C':[240,90,38],
+  'ORANGE 021 C':[254,80,0],'YELLOW 012 C':[255,220,0],'GREEN C':[0,150,90],
+  'BLUE 072 C':[0,32,158],'VIOLET C':[55,0,175],'RUBINE RED C':[205,0,60],
+  'RHODAMINE RED C':[226,0,122],'PURPLE C':[187,41,182],'REFLEX BLUE C':[0,20,137],
+  'PROCESS BLUE C':[0,115,210],
+  '100 C':[243,225,93],'101 C':[247,224,52],'102 C':[252,220,0],'103 C':[199,172,0],
+  '104 C':[173,148,0],'105 C':[131,113,0],'106 C':[249,224,67],'107 C':[249,220,30],
+  '108 C':[249,213,0],'109 C':[252,207,0],'110 C':[207,170,0],'111 C':[166,135,0],
+  '112 C':[140,115,0],'113 C':[253,221,83],'114 C':[253,218,61],'115 C':[254,213,34],
+  '116 C':[255,185,0],'117 C':[196,140,0],'118 C':[158,112,0],'119 C':[121,86,0],
+  '120 C':[254,223,95],'121 C':[254,219,75],'122 C':[254,213,49],'123 C':[255,199,0],
+  '124 C':[215,162,0],'125 C':[170,129,0],'126 C':[135,103,0],'127 C':[247,220,118],
+  '128 C':[247,214,89],'129 C':[247,207,55],'130 C':[241,179,0],'131 C':[196,143,0],
+  '132 C':[155,113,0],'133 C':[112,81,0],'134 C':[249,215,131],'135 C':[249,207,103],
+  '136 C':[249,198,64],'137 C':[255,176,0],'138 C':[207,140,0],'139 C':[163,110,0],
+  '140 C':[116,80,0],'141 C':[247,207,139],'142 C':[247,198,106],'143 C':[247,187,64],
+  '144 C':[235,152,0],'145 C':[189,122,0],'146 C':[147,96,0],'147 C':[104,68,0],
+  '148 C':[252,207,155],'149 C':[252,196,126],'150 C':[252,181,83],'151 C':[255,121,0],
+  '152 C':[215,103,0],'153 C':[168,82,0],'154 C':[124,61,0],'155 C':[249,199,169],
+  '156 C':[249,183,145],'157 C':[249,162,108],'158 C':[238,126,41],'159 C':[196,98,16],
+  '160 C':[152,77,13],'161 C':[107,55,9],'162 C':[252,193,177],'163 C':[252,172,152],
+  '164 C':[252,148,115],'165 C':[255,98,38],'166 C':[216,80,28],'167 C':[170,63,23],
+  '168 C':[117,43,16],'169 C':[252,183,183],'170 C':[252,161,158],'171 C':[252,131,120],
+  '172 C':[252,96,66],'173 C':[209,74,42],'174 C':[160,57,32],'175 C':[113,40,23],
+  '176 C':[252,170,175],'177 C':[252,144,145],'178 C':[252,110,107],'179 C':[227,62,42],
+  '180 C':[187,52,35],'181 C':[138,40,27],'182 C':[252,184,196],'183 C':[252,162,178],
+  '184 C':[252,131,155],'185 C':[228,0,43],'186 C':[200,16,46],'187 C':[163,30,45],
+  '188 C':[119,22,37],'189 C':[252,170,188],'190 C':[252,147,170],'191 C':[252,112,148],
+  '192 C':[249,60,107],'193 C':[221,48,66],'194 C':[175,41,56],'195 C':[128,33,46],
+  '196 C':[249,180,196],'197 C':[249,155,177],'198 C':[249,115,151],'199 C':[215,47,81],
+  '200 C':[186,12,47],'201 C':[163,30,52],'202 C':[149,40,56],
+  '210 C':[255,160,168],'211 C':[255,131,152],'212 C':[255,98,133],'213 C':[237,29,109],
+  '214 C':[207,19,98],'215 C':[178,16,88],'216 C':[140,14,71],
+  '217 C':[250,179,200],'218 C':[240,94,161],'219 C':[215,0,100],'220 C':[180,0,86],
+  '221 C':[148,0,73],'222 C':[113,0,59],
+  '223 C':[246,155,193],'224 C':[243,119,174],'225 C':[237,72,152],'226 C':[215,0,115],
+  '227 C':[183,0,97],'228 C':[150,0,79],'229 C':[108,0,57],
+  '230 C':[252,172,207],'231 C':[252,141,191],'232 C':[252,100,168],'233 C':[190,0,126],
+  '234 C':[157,0,107],'235 C':[126,0,84],
+  '236 C':[250,171,215],'237 C':[247,137,202],'238 C':[241,91,181],'239 C':[222,43,164],
+  '240 C':[191,29,146],'241 C':[162,19,128],'242 C':[120,14,97],
+  '243 C':[238,179,221],'244 C':[232,151,211],'245 C':[224,116,196],'246 C':[195,0,163],
+  '247 C':[166,0,142],'248 C':[135,0,116],'249 C':[103,0,89],
+  '250 C':[236,190,228],'251 C':[228,160,219],'252 C':[213,116,201],'253 C':[175,48,178],
+  '254 C':[148,33,158],'255 C':[117,25,130],
+  '256 C':[222,190,225],'257 C':[210,163,218],'258 C':[152,85,181],'259 C':[130,48,135],
+  '260 C':[111,36,117],'261 C':[92,28,99],'262 C':[72,22,79],
+  '263 C':[215,196,226],'264 C':[191,165,214],'265 C':[148,103,189],'266 C':[116,64,175],
+  '267 C':[95,48,153],'268 C':[80,34,131],'269 C':[58,24,99],
+  '270 C':[186,178,215],'271 C':[158,150,198],'272 C':[131,122,179],'273 C':[64,48,138],
+  '274 C':[44,28,116],'275 C':[33,18,97],'276 C':[25,13,77],
+  '277 C':[175,199,229],'278 C':[148,181,219],'279 C':[100,149,197],'280 C':[0,50,160],
+  '281 C':[0,44,136],'282 C':[0,36,107],
+  '283 C':[157,188,222],'284 C':[119,158,207],'285 C':[0,97,182],'286 C':[0,68,190],
+  '287 C':[0,58,173],'288 C':[0,48,143],'289 C':[0,36,107],
+  '290 C':[183,210,232],'291 C':[151,191,224],'292 C':[100,160,207],'293 C':[0,80,200],
+  '294 C':[0,63,167],'295 C':[0,52,137],'296 C':[0,40,106],
+  '297 C':[95,188,224],'298 C':[0,163,215],'299 C':[0,169,224],'300 C':[0,85,183],
+  '301 C':[0,80,140],'302 C':[0,62,115],'303 C':[0,48,87],
+  '304 C':[146,214,229],'305 C':[68,199,220],'306 C':[0,197,215],'307 C':[0,131,157],
+  '308 C':[0,109,131],'309 C':[0,81,98],
+  '310 C':[72,210,222],'311 C':[0,191,211],'312 C':[0,172,205],'313 C':[0,158,195],
+  '314 C':[0,135,168],'315 C':[0,109,136],'316 C':[0,82,100],
+  '317 C':[174,225,225],'318 C':[106,208,214],'319 C':[0,189,196],'320 C':[0,155,166],
+  '321 C':[0,134,135],'322 C':[0,111,112],'323 C':[0,136,130],
+  '324 C':[152,214,209],'325 C':[88,196,190],'326 C',[0,177,169],'327 C':[0,131,122],
+  '328 C':[0,109,103],'329 C':[0,87,81],'330 C':[0,64,59],
+  '331 C':[160,220,210],'332 C':[126,207,198],'333 C':[0,186,174],'334 C':[0,140,130],
+  '335 C':[0,112,101],'336 C':[0,85,74],'337 C':[138,204,188],
+  '340 C':[0,167,107],'341 C':[0,138,87],'342 C':[0,110,68],'343 C':[0,84,51],
+  '345 C':[134,201,155],'346 C':[105,187,133],'347 C':[0,152,68],'348 C':[0,122,51],
+  '349 C':[0,96,40],'350 C':[0,69,31],
+  '354 C':[0,173,67],'355 C':[0,149,58],'356 C':[0,120,47],'357 C':[0,91,36],
+  '360 C':[100,181,94],'361 C':[71,174,73],'362 C':[94,170,78],'363 C':[83,153,68],
+  '364 C':[67,126,54],'365 C':[179,214,120],'366 C':[161,205,96],'367 C':[140,196,74],
+  '368 C':[120,190,65],'369 C':[100,170,56],'370 C':[75,137,43],'371 C':[55,101,33],
+  '372 C':[205,225,144],'373 C':[191,219,114],'374 C':[172,212,79],'375 C':[171,213,59],
+  '376 C':[148,188,40],'377 C':[113,150,26],'378 C':[76,100,16],
+  '382 C':[208,224,68],'383 C':[190,213,41],'384 C':[170,200,14],'385 C':[138,166,0],
+  '386 C':[227,230,75],'387 C':[218,229,34],'388 C':[209,228,0],'389 C':[196,218,0],
+  '390 C':[181,209,0],'391 C':[151,172,0],'392 C':[115,133,0],
+  '393 C':[243,232,94],'394 C':[242,230,57],'395 C':[240,228,20],'396 C':[234,222,0],
+  '397 C':[193,182,0],'398 C':[160,151,0],'399 C':[121,115,0],
+  '400 C':[176,168,152],'401 C':[168,160,145],'402 C':[155,148,135],'403 C':[143,135,121],
+  '404 C':[130,122,108],'405 C':[110,102,88],
+  '406 C':[200,192,182],'407 C':[183,175,163],'408 C':[165,155,143],'409 C':[148,138,125],
+  '410 C':[131,120,108],'411 C':[109,99,87],'412 C':[77,68,58],
+  '413 C':[188,186,172],'414 C':[170,168,154],'415 C':[152,150,136],'416 C':[134,133,119],
+  '417 C':[117,116,101],'418 C':[98,96,81],'419 C':[56,54,40],
+  '420 C':[205,200,190],'421 C':[191,188,178],'422 C':[177,173,163],'423 C':[163,160,151],
+  '424 C':[148,144,135],'425 C':[131,128,120],'426 C':[100,97,89],
+  '427 C':[216,214,207],'428 C':[205,203,196],'429 C':[185,188,190],'430 C':[155,160,163],
+  '431 C':[107,113,117],'432 C':[77,82,84],'433 C':[52,57,62],
+  '442 C':[190,193,186],'443 C':[170,173,166],'444 C':[148,151,143],'445 C':[112,115,108],
+  '446 C':[85,87,80],'447 C':[60,62,55],
+  '448 C':[74,65,42],'449 C':[88,78,50],'450 C':[103,91,59],'451 C':[151,139,95],
+  '452 C':[175,162,116],'453 C':[197,184,140],'454 C':[215,204,162],
+  '462 C':[107,79,42],'463 C':[127,93,50],'464 C':[150,108,57],'465 C':[174,131,84],
+  '466 C':[197,155,110],'467 C':[218,182,143],'468 C':[231,200,165],
+  '469 C':[142,82,54],'470 C':[170,102,65],'471 C':[199,120,76],'472 C':[218,146,103],
+  '473 C':[236,176,137],'474 C':[244,196,162],'475 C':[249,212,183],
+  '476 C':[92,61,40],'477 C':[111,73,46],'478 C':[134,87,52],
+  '485 C':[218,41,28],'487 C':[255,175,155],'488 C':[248,186,161],
+  '490 C':[89,38,28],'491 C':[109,47,33],'492 C':[130,57,40],
+  '495 C':[157,90,75],'496 C':[180,115,99],'497 C':[140,80,66],
+  '503 C':[196,154,148],'504 C':[174,128,120],'505 C':[149,100,91],
+  '513 C':[185,84,155],'514 C':[200,107,165],'515 C':[212,128,173],
+  '519 C':[106,55,121],'520 C':[120,65,135],'521 C':[140,83,152],
+  '527 C':[142,83,185],'528 C':[157,99,192],'529 C':[175,120,200],
+  'COOL GRAY 1 C':[225,224,219],'COOL GRAY 2 C':[214,213,208],'COOL GRAY 3 C':[200,199,194],
+  'COOL GRAY 4 C':[188,186,181],'COOL GRAY 5 C':[172,170,165],'COOL GRAY 6 C':[157,155,150],
+  'COOL GRAY 7 C':[144,142,136],'COOL GRAY 8 C':[128,126,121],'COOL GRAY 9 C':[113,111,106],
+  'COOL GRAY 10 C':[98,96,92],'COOL GRAY 11 C':[83,81,77],
+  'WARM GRAY 1 C':[224,218,209],'WARM GRAY 2 C':[211,205,194],'WARM GRAY 3 C':[196,190,178],
+  'WARM GRAY 4 C':[180,174,162],'WARM GRAY 5 C':[165,159,147],'WARM GRAY 6 C':[149,143,131],
+  'WARM GRAY 7 C':[133,127,116],'WARM GRAY 8 C':[116,110,99],'WARM GRAY 9 C':[101,95,85],
+  'WARM GRAY 10 C':[86,80,70],'WARM GRAY 11 C':[72,66,57],
+  '2728 C':[0,67,210],'2716 C':[100,130,210],'2915 C':[100,175,225],
+};
+
+// ─────────────────────────────────────────
+// NCS ALGORITHM
+// ─────────────────────────────────────────
+const NCS_ELEM = { Y:[255,216,0], R:[188,0,55], B:[0,73,201], G:[0,162,91] };
+
+function ncsHueToAngle(hue) {
+  if (hue === 'N') return null;
+  const bases = {Y:0,R:90,B:180,G:270};
+  if (bases[hue] !== undefined) return bases[hue];
+  const m = hue.match(/^([YRBG])(\d+)([YRBG])$/);
+  if (!m) return null;
+  const from = bases[m[1]], to = bases[m[3]], pct = parseInt(m[2])/100;
+  let diff = to - from;
+  if (Math.abs(diff) > 180) diff = diff > 0 ? diff - 360 : diff + 360;
+  return ((from + diff * pct) + 360) % 360;
+}
+
+function ncsAngleToRgb(a) {
+  const stops = [[0,NCS_ELEM.Y],[90,NCS_ELEM.R],[180,NCS_ELEM.B],[270,NCS_ELEM.G],[360,NCS_ELEM.Y]];
+  for (let i = 0; i < 4; i++) {
+    const [a0,c0] = stops[i], [a1,c1] = stops[i+1];
+    if (a >= a0 && a <= a1) {
+      const t = (a - a0) / (a1 - a0);
+      return [Math.round(c0[0]+(c1[0]-c0[0])*t), Math.round(c0[1]+(c1[1]-c0[1])*t), Math.round(c0[2]+(c1[2]-c0[2])*t)];
+    }
+  }
+  return NCS_ELEM.Y;
+}
+
+function ncsToRgb(code) {
+  const m = code.replace(/\s+/g,'').toUpperCase().match(/^S?(\d{2})(\d{2})-(N|[YRBG](?:\d{2}[YRBG])?)$/);
+  if (!m) return null;
+  const b = parseInt(m[1]), c = parseInt(m[2]), hue = m[3];
+  const w = 100 - b - c;
+  if (w < 0) return null;
+  if (hue === 'N' || c === 0) {
+    const v = Math.round(255 * (100 - b) / 100);
+    return [v, v, v];
+  }
+  const angle = ncsHueToAngle(hue);
+  if (angle === null) return null;
+  const [cr,cg,cb] = ncsAngleToRgb(angle);
+  return [
+    Math.max(0,Math.min(255, Math.round(w/100*255 + c/100*cr))),
+    Math.max(0,Math.min(255, Math.round(w/100*255 + c/100*cg))),
+    Math.max(0,Math.min(255, Math.round(w/100*255 + c/100*cb))),
+  ];
+}
+
+function buildNCSDatabase() {
+  const db = [];
+  for (let b = 5; b <= 90; b += 5) {
+    const code = `S ${String(b).padStart(2,'0')}00-N`;
+    db.push({code, rgb: ncsToRgb(code)});
+  }
+  const hues = [
+    'Y','Y10R','Y20R','Y30R','Y40R','Y50R','Y60R','Y70R','Y80R','Y90R',
+    'R','R10B','R20B','R30B','R40B','R50B','R60B','R70B','R80B','R90B',
+    'B','B10G','B20G','B30G','B40G','B50G','B60G','B70G','B80G','B90G',
+    'G','G10Y','G20Y','G30Y','G40Y','G50Y','G60Y','G70Y','G80Y','G90Y',
+  ];
+  for (const hue of hues) {
+    for (let b = 0; b <= 70; b += 10) {
+      for (let c = 10; c <= 80; c += 10) {
+        if (b + c > 95) continue;
+        const code = `S ${String(b).padStart(2,'0')}${String(c).padStart(2,'0')}-${hue}`;
+        const rgb = ncsToRgb(code);
+        if (rgb) db.push({code, rgb});
+      }
+    }
+  }
+  return db;
+}
+
+const NCS_DB = buildNCSDatabase();
+
+// ─────────────────────────────────────────
+// COLOR MATH
+// ─────────────────────────────────────────
+function rgbToLab(r, g, b) {
+  let R = r/255, G = g/255, B = b/255;
+  R = R > 0.04045 ? Math.pow((R+0.055)/1.055,2.4) : R/12.92;
+  G = G > 0.04045 ? Math.pow((G+0.055)/1.055,2.4) : G/12.92;
+  B = B > 0.04045 ? Math.pow((B+0.055)/1.055,2.4) : B/12.92;
+  const X = R*0.4124564+G*0.3575761+B*0.1804375;
+  const Y = R*0.2126729+G*0.7151522+B*0.0721750;
+  const Z = R*0.0193339+G*0.1191920+B*0.9503041;
+  const f = v => v > 0.008856 ? Math.cbrt(v) : (7.787*v+16/116);
+  const fx=f(X/0.95047), fy=f(Y/1.0), fz=f(Z/1.08883);
+  return [116*fy-16, 500*(fx-fy), 200*(fy-fz)];
+}
+
+function deltaE(lab1, lab2) {
+  return Math.sqrt((lab1[0]-lab2[0])**2+(lab1[1]-lab2[1])**2+(lab1[2]-lab2[2])**2);
+}
+
+function findNearest(rgb, db) {
+  const lab = rgbToLab(...rgb);
+  let best = null, bestDE = Infinity;
+  for (const e of db) {
+    const de = deltaE(lab, rgbToLab(...e.rgb));
+    if (de < bestDE) { bestDE = de; best = {...e, de}; }
+  }
+  return best;
+}
+
+function deLabel(de) {
+  if (de < 3)  return ['excellent','Excellent match'];
+  if (de < 8)  return ['good','Good match'];
+  if (de < 15) return ['approx','Approximate'];
+  return ['distant','Distant match'];
+}
+
+// ─────────────────────────────────────────
+// INPUT PARSING
+// ─────────────────────────────────────────
+function parseInput(s) {
+  s = s.trim();
+  if (!s) return null;
+
+  // HEX #RRGGBB or RRGGBB
+  let m = s.match(/^#?([0-9a-f]{6})$/i);
+  if (m) {
+    const h = m[1];
+    return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+  }
+  // HEX short #RGB
+  m = s.match(/^#([0-9a-f]{3})$/i);
+  if (m) {
+    const h = m[1];
+    return [parseInt(h[0]+h[0],16),parseInt(h[1]+h[1],16),parseInt(h[2]+h[2],16)];
+  }
+  // Extract all numbers
+  const nums = s.replace(/[^\d.,]/g,' ').trim().split(/[\s,]+/).filter(n=>n!=='').map(Number).filter(n=>!isNaN(n));
+
+  // CMYK: 4 values 0-100
+  if (nums.length === 4) {
+    const [C,M,Y,K] = nums;
+    if (C<=100&&M<=100&&Y<=100&&K<=100) {
+      return [
+        Math.round(255*(1-C/100)*(1-K/100)),
+        Math.round(255*(1-M/100)*(1-K/100)),
+        Math.round(255*(1-Y/100)*(1-K/100)),
+      ];
+    }
+  }
+  // RGB: 3 values
+  if (nums.length === 3) {
+    const [r,g,b] = nums;
+    if (r<=255&&g<=255&&b<=255) return [Math.round(r),Math.round(g),Math.round(b)];
+  }
+  // Pantone lookup
+  const key = s.replace(/^pantone\s*/i,'').toUpperCase().trim();
+  if (PANTONE_DB[key]) return PANTONE_DB[key];
+  // Try without suffix variants: "2728C" → "2728 C"
+  const keySpaced = key.replace(/(\d)([A-Z]+)$/, '$1 $2');
+  if (PANTONE_DB[keySpaced]) return PANTONE_DB[keySpaced];
+
+  return null;
+}
+
+// ─────────────────────────────────────────
+// UI
+// ─────────────────────────────────────────
+function rgbToHex(r,g,b) {
+  return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('').toUpperCase();
+}
+
+function luminance(r,g,b) { return 0.299*r+0.587*g+0.114*b; }
+
+function onInput() {
+  const val = document.getElementById('cc-input').value;
+  const rgb = parseInput(val);
+  const errorEl   = document.getElementById('cc-error');
+  const swatchEl  = document.getElementById('cc-swatch');
+  const labelEl   = document.getElementById('cc-swatch-label');
+  const rgbEl     = document.getElementById('cc-rgb');
+  const resultsEl = document.getElementById('cc-results');
+
+  if (!val.trim()) {
+    errorEl.textContent = '';
+    swatchEl.style.background = 'var(--bg3)';
+    labelEl.textContent = '';
+    rgbEl.textContent = '';
+    resultsEl.style.display = 'none';
+    return;
+  }
+
+  if (!rgb) {
+    errorEl.textContent = 'Unrecognised format — try #RRGGBB, r,g,b, c,m,y,k or a Pantone code';
+    swatchEl.style.background = 'var(--bg3)';
+    labelEl.textContent = '';
+    rgbEl.textContent = '';
+    resultsEl.style.display = 'none';
+    return;
+  }
+
+  errorEl.textContent = '';
+  const [r,g,b] = rgb;
+  const hex = rgbToHex(r,g,b);
+  const textColor = luminance(r,g,b) > 140 ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)';
+
+  swatchEl.style.background = hex;
+  labelEl.style.color = textColor;
+  labelEl.textContent = hex;
+  rgbEl.textContent = `rgb(${r}, ${g}, ${b})`;
+
+  // Find nearest RAL
+  const ral = findNearest(rgb, RAL_DB);
+  const [ralClass, ralLabel] = deLabel(ral.de);
+  const ralHex = rgbToHex(...ral.rgb);
+  document.getElementById('ral-swatch').style.background = ralHex;
+  document.getElementById('ral-code').textContent = ral.code;
+  document.getElementById('ral-name').textContent = ral.name;
+  document.getElementById('ral-de').innerHTML =
+    `<span class="cc-de-badge cc-de-${ralClass}">${ralLabel}</span> <span style="color:var(--text3);font-size:10px">ΔE ${ral.de.toFixed(1)}</span>`;
+
+  // Find nearest NCS
+  const ncs = findNearest(rgb, NCS_DB);
+  const [ncsClass, ncsLabel] = deLabel(ncs.de);
+  const ncsHex = rgbToHex(...ncs.rgb);
+  document.getElementById('ncs-swatch').style.background = ncsHex;
+  document.getElementById('ncs-code').textContent = ncs.code;
+  document.getElementById('ncs-name').textContent = '≈ approx.';
+  document.getElementById('ncs-de').innerHTML =
+    `<span class="cc-de-badge cc-de-${ncsClass}">${ncsLabel}</span> <span style="color:var(--text3);font-size:10px">ΔE ${ncs.de.toFixed(1)}</span>`;
+
+  // Reset copy buttons
+  document.getElementById('ral-copy').textContent = 'Copy code';
+  document.getElementById('ral-copy').classList.remove('copied');
+  document.getElementById('ncs-copy').textContent = 'Copy code';
+  document.getElementById('ncs-copy').classList.remove('copied');
+
+  resultsEl.style.display = 'grid';
+}
+
+function copyCode(codeId, btnId) {
+  const code = document.getElementById(codeId).textContent;
+  navigator.clipboard.writeText(code).catch(() => {});
+  const btn = document.getElementById(btnId);
+  btn.textContent = 'Copied!';
+  btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = 'Copy code'; btn.classList.remove('copied'); }, 2000);
+}
+</script>
+</body>
+</html>

@@ -488,11 +488,35 @@ function openJobBoardModal(pid, tid) {
   ).join('');
 
   document.getElementById('jb-task-name').textContent = task.name;
-  document.getElementById('jb-ready-by').value = existing ? (existing.readyByDate || projectMeta.date || '') : (projectMeta.date || '');
+  document.getElementById('jb-ready-by').value    = existing ? (existing.readyByDate  || projectMeta.date || '') : (projectMeta.date || '');
+  document.getElementById('jb-ready-time').value  = existing ? (existing.readyByTime  || '') : '';
+  document.getElementById('jb-strike-date').value = existing ? (existing.strikeDate   || '') : '';
+  document.getElementById('jb-strike-time').value = existing ? (existing.strikeTime   || '') : '';
+  document.getElementById('jb-contact').value     = existing ? (existing.contactName  || '') : '';
+
+  // Location
+  const loc = existing ? (existing.location || {}) : {};
+  document.getElementById('jb-loc-type').value    = loc.type || '';
+  document.getElementById('jb-studio-num').value  = loc.studioNum || '';
+  document.getElementById('jb-loc-addr').value    = loc.address   || '';
+  onJbLocChange();
+
+  // Job type chips
+  const activeTypes = existing ? (existing.jobTypes || []) : [];
+  document.querySelectorAll('#jb-type-chips .type-chip').forEach(btn => {
+    btn.classList.toggle('active', activeTypes.includes(btn.dataset.type));
+  });
+
   document.getElementById('jb-stages-list').innerHTML = stagesHTML;
   document.getElementById('jb-crew-section').innerHTML = `${rosterOptions}<div id="jb-crew-list">${existingCrewHTML}</div><button type="button" class="add-inline-btn" onclick="addCrewFreetext()">+ Add name</button>`;
 
   document.getElementById('jb-modal').classList.add('open');
+}
+
+function onJbLocChange() {
+  const type = document.getElementById('jb-loc-type').value;
+  document.getElementById('jb-studio-num').style.display = type === 'studio'     ? '' : 'none';
+  document.getElementById('jb-loc-addr').style.display   = type === 'onlocation' ? '' : 'none';
 }
 
 function addCrewFromPicker() {
@@ -540,7 +564,18 @@ function confirmJobBoard() {
     name: inp.value.trim(),
   })).filter(a => a.name);
 
-  const readyByDate = document.getElementById('jb-ready-by').value;
+  const readyByDate  = document.getElementById('jb-ready-by').value;
+  const readyByTime  = document.getElementById('jb-ready-time').value;
+  const strikeDate   = document.getElementById('jb-strike-date').value;
+  const strikeTime   = document.getElementById('jb-strike-time').value;
+  const contactName  = document.getElementById('jb-contact').value.trim();
+  const jobTypes     = [...document.querySelectorAll('#jb-type-chips .type-chip.active')].map(b => b.dataset.type);
+  const locType      = document.getElementById('jb-loc-type').value;
+  const location     = locType ? {
+    type:      locType,
+    studioNum: locType === 'studio'     ? document.getElementById('jb-studio-num').value : '',
+    address:   locType === 'onlocation' ? document.getElementById('jb-loc-addr').value   : '',
+  } : null;
 
   const existingIdx = S.jobTasks.findIndex(jt => jt.taskId === tid);
   const entry = {
@@ -553,6 +588,12 @@ function confirmJobBoard() {
     hrs:         task.hrs,
     assignedTo:  crewEntries,
     readyByDate,
+    readyByTime,
+    strikeDate,
+    strikeTime,
+    location,
+    jobTypes,
+    contactName,
     stages:      stagesData,
     status:      existingIdx >= 0 ? S.jobTasks[existingIdx].status : 'upcoming',
   };

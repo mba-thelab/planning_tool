@@ -220,14 +220,18 @@ function renderTaskView(tasks, stages, mainEl) {
       .join(' → ') || '—';
     const statusClass = task.status || 'upcoming';
     const statusLabel = statusClass === 'in-progress' ? 'In Progress' : capitalize(statusClass);
+    const locLabel = fmtLocation(task.location);
+    const readyStr = task.readyByDate
+      ? fmtDate(task.readyByDate) + (task.readyByTime ? ` ${task.readyByTime}` : '')
+      : '—';
     return `<div class="task-list-row">
       <div>
         <div style="font-weight:500;color:var(--hi)">${esc(task.name)}</div>
-        <div style="font-size:11px;color:var(--text3)">${esc(item.projectName)}</div>
+        <div style="font-size:11px;color:var(--text3)">${esc(item.projectName)}${locLabel ? ` · ${esc(locLabel)}` : ''}</div>
       </div>
       <div style="color:var(--text2);font-size:11px">${crew}</div>
       <div style="color:var(--text3);font-size:11px">${pipelineSummary}</div>
-      <div style="color:${task.readyByDate?'var(--hi)':'var(--text3)'};font-size:11px">${task.readyByDate?fmtDate(task.readyByDate):'—'}</div>
+      <div style="color:${task.readyByDate?'var(--hi)':'var(--text3)'};font-size:11px">${readyStr}</div>
       <div>
         <button class="status-badge ${statusClass}" onclick="cycleStatus('${item.projectKey}','${task.id}')">${statusLabel}</button>
       </div>
@@ -235,6 +239,14 @@ function renderTaskView(tasks, stages, mainEl) {
   }).join('');
 
   mainEl.innerHTML = header + rows;
+}
+
+// ── LOCATION LABEL ──
+function fmtLocation(loc) {
+  if (!loc || !loc.type) return '';
+  const labels = { floor4:'4th floor', forhallen:'Forhallen', equipment:'Equipment room', onlocation:'On location', other:'Other' };
+  if (loc.type === 'studio') return loc.studioNum ? `Studio ${loc.studioNum}` : 'Studio';
+  return labels[loc.type] || loc.type;
 }
 
 // ── TASK CARD ──
@@ -248,9 +260,30 @@ function taskCard(task, projectKey, stages, showProject) {
     ? `<div class="crew-tags">${crew.map(a => `<span class="crew-tag">${esc(a.name)}</span>`).join('')}</div>`
     : '';
 
-  const readyByHTML = task.readyByDate
-    ? `<div class="ready-by" style="margin-bottom:10px">Ready by <span class="ready-by-date">${fmtDate(task.readyByDate)}</span></div>`
+  // Meta row: location + job types + contact
+  const locLabel = fmtLocation(task.location);
+  const typeBadges = (task.jobTypes || []).map(t =>
+    `<span class="job-type-badge ${t}">${capitalize(t)}</span>`
+  ).join('');
+  const metaHTML = (locLabel || typeBadges || task.contactName) ? `
+    <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-bottom:8px">
+      ${locLabel ? `<span class="loc-badge">${esc(locLabel)}</span>` : ''}
+      ${typeBadges}
+      ${task.contactName ? `<span style="font-size:10px;color:var(--text3);margin-left:2px">Contact: ${esc(task.contactName)}</span>` : ''}
+    </div>` : '';
+
+  // Ready by + strike
+  const readyStr = task.readyByDate
+    ? fmtDate(task.readyByDate) + (task.readyByTime ? ` at ${task.readyByTime}` : '')
     : '';
+  const strikeStr = task.strikeDate
+    ? fmtDate(task.strikeDate) + (task.strikeTime ? ` at ${task.strikeTime}` : '')
+    : '';
+  const datesHTML = (readyStr || strikeStr) ? `
+    <div style="display:flex;gap:16px;margin-bottom:10px;font-size:11px">
+      ${readyStr ? `<div>Ready <span style="color:var(--hi);font-weight:500">${esc(readyStr)}</span></div>` : ''}
+      ${strikeStr ? `<div style="color:var(--text3)">Strike <span style="color:var(--text2)">${esc(strikeStr)}</span></div>` : ''}
+    </div>` : '';
 
   const pipelineHTML = buildPipelineHTML(stages, taskStages);
 
@@ -273,8 +306,9 @@ function taskCard(task, projectKey, stages, showProject) {
         <button class="status-badge ${statusClass}" onclick="cycleStatus('${projectKey}','${task.id}')">${statusLabel}</button>
       </div>
     </div>
+    ${metaHTML}
     ${crewHTML}
-    ${readyByHTML}
+    ${datesHTML}
     ${pipelineHTML}
   </div>`;
 }
