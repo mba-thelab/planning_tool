@@ -21,7 +21,7 @@ let pendingJobTask = null; // for "Add to Job Board" modal
       Object.assign(S, autosave.S);
       Object.assign(projectMeta, {name:autosave.name||'',client:autosave.client||'',version:autosave.version||'V1',date:autosave.date||'',currency:autosave.currency||'DKK'});
     } else {
-      loadDemoData();
+      initBlankProject();
     }
   }
 
@@ -29,9 +29,28 @@ let pendingJobTask = null; // for "Add to Job Board" modal
   renderAssignOpts();
   renderProcess();
   renderSavedList();
+
+  // Show seed button in test mode
+  if (App.getWorkspace() === 'test') {
+    const seedBtn = document.getElementById('seed-btn');
+    if (seedBtn) seedBtn.style.display = '';
+  }
 })();
 
-function loadDemoData() {
+function initBlankProject() {
+  projectMeta.name   = '';
+  projectMeta.client = '';
+  projectMeta.date   = new Date().toISOString().slice(0, 10);
+  S.assignOpts = [];
+  S.jobTasks   = [];
+  S.overrides  = {};
+  S.process    = { phases: DEFAULT_PHASES.map(p => ({id:uid(), key:p.key, label:p.label, bg:p.bg, text:p.text, tasks:[]})) };
+  S.estimate   = { sections: [{id:uid(),name:'Labour',rows:[]},{id:uid(),name:'Materials',rows:[]},{id:uid(),name:'Technical',rows:[]}] };
+}
+
+// Only called from "Seed test data" button — test mode only
+function seedTestData() {
+  if (App.getWorkspace() !== 'test') return;
   projectMeta.name   = 'Flagship Store — Fit-Out';
   projectMeta.client = 'Aesop Nordic';
   projectMeta.date   = new Date().toISOString().slice(0, 10);
@@ -66,15 +85,18 @@ function loadDemoData() {
       {id:uid(),name:'Site clean & handover',spec:'',crew:2,hrs:2,hold:'Both teams',note:'Hand keys to store manager'},
     ]},
   ]};
+  S.estimate = { sections: [
+    {id:uid(),name:'Labour',rows:[]},
+    {id:uid(),name:'Materials',rows:[]},
+    {id:uid(),name:'Technical',rows:[]},
+  ]};
 
-  // Also ensure estimate sections exist (needed for push-to-estimate)
-  if (!S.estimate || !S.estimate.sections || !S.estimate.sections.length) {
-    S.estimate = { sections: [
-      {id:uid(),name:'Labour',rows:[]},
-      {id:uid(),name:'Materials',rows:[]},
-      {id:uid(),name:'Technical',rows:[]},
-    ]};
-  }
+  App.clearDraft();
+  applyMetaToDOM();
+  renderAssignOpts();
+  renderProcess();
+  renderSavedList();
+  document.getElementById('dirty-ind').style.display = 'inline';
 }
 
 function applyMetaToDOM() {

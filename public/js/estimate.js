@@ -36,14 +36,14 @@ let pendingPush = null;
       });
       applyMetaToDOM();
     } else {
-      loadDemoData(settings);
+      initBlankEstimate(settings);
     }
   }
 
   if (!S.assignOpts || !S.assignOpts.length) {
     S.assignOpts = settings.allocationOptions && settings.allocationOptions.length
       ? [...settings.allocationOptions]
-      : ['Team A', 'Team B', 'Both teams', 'External'];
+      : [];
   }
 
   // Load coverPage from effective settings (after S is loaded so project overrides apply)
@@ -54,6 +54,12 @@ let pendingPush = null;
   renderSavedList();
   App.fetchRates(document.getElementById('cur-status')).then(() => onCurChange());
   document.getElementById('cover-toggle').checked = coverPageEnabled;
+
+  // Show seed button in test mode
+  if (App.getWorkspace() === 'test') {
+    const seedBtn = document.getElementById('seed-btn');
+    if (seedBtn) seedBtn.style.display = '';
+  }
 })();
 
 function applyMetaToDOM() {
@@ -64,15 +70,26 @@ function applyMetaToDOM() {
   document.getElementById('sel-cur').value      = projectMeta.currency || 'DKK';
 }
 
-function loadDemoData(settings) {
-  const defaultOpts = settings.allocationOptions && settings.allocationOptions.length
-    ? settings.allocationOptions
-    : ['Team A', 'Team B', 'Both teams', 'External'];
+function initBlankEstimate(settings) {
+  projectMeta.name   = '';
+  projectMeta.client = '';
+  projectMeta.date   = new Date().toISOString().slice(0, 10);
+  S = {
+    estimate: { sections: [{id:uid(),name:'Labour',rows:[]},{id:uid(),name:'Materials',rows:[]},{id:uid(),name:'Technical',rows:[]}] },
+    process:  { phases: DEFAULT_PHASES.map(p => ({id:uid(),key:p.key,label:p.label,bg:p.bg,text:p.text,tasks:[]})) },
+    assignOpts: [],
+    jobTasks: [],
+    overrides: {},
+  };
+  applyMetaToDOM();
+}
 
+// Only callable in test mode — seeds realistic sample data
+function seedTestData() {
+  if (App.getWorkspace() !== 'test') return;
   projectMeta.name   = 'Flagship Store — Fit-Out';
   projectMeta.client = 'Aesop Nordic';
   projectMeta.date   = new Date().toISOString().slice(0, 10);
-
   S = {
     estimate: { sections: [
       {id:uid(),name:'Labour',rows:[
@@ -95,11 +112,16 @@ function loadDemoData(settings) {
       ]},
     ]},
     process: { phases: DEFAULT_PHASES.map(p => ({id:uid(),key:p.key,label:p.label,bg:p.bg,text:p.text,tasks:[]})) },
-    assignOpts: [...defaultOpts],
+    assignOpts: ['Team A', 'Team B', 'Both teams', 'External'],
     jobTasks: [],
     overrides: {},
   };
+  App.clearDraft();
   applyMetaToDOM();
+  renderAssignOpts();
+  renderEstimate();
+  renderSavedList();
+  document.getElementById('dirty-ind').style.display = 'inline';
 }
 
 // ── SWITCH TO PROCESS ──
