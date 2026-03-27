@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The/Lab — Process</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="topbar">
+  <a class="logo" href="/">THE/LAB</a>
+  <div class="sep"></div>
+  <input class="ti proj" id="proj-name" placeholder="Project name..." oninput="dirty()">
+  <div class="sep"></div>
+  <input class="ti client" id="proj-client" placeholder="Client..." oninput="dirty()">
+  <div class="tabs">
+    <div class="tab" onclick="switchToEstimate()">Estimate</div>
+    <div class="tab active">Process</div>
+  </div>
+  <div class="tr-right">
+    <span class="dirty" id="dirty-ind" style="display:none">● Unsaved</span>
+    <div style="position:relative">
+      <button class="btn" onclick="toggleExportMenu()">Export ▾</button>
+      <div id="exp-menu" style="display:none;position:absolute;right:0;top:110%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:4px;z-index:100;min-width:220px">
+        <div id="exp-items"></div>
+      </div>
+    </div>
+    <button class="btn ghost" onclick="saveProject()">Save</button>
+    <a href="/settings.html" class="btn ghost" style="text-decoration:none">⚙</a>
+  </div>
+</div>
+
+<div class="app">
+  <div class="sidebar">
+    <div>
+      <div class="sb-lbl">Project</div>
+      <div class="sb-row">
+        <select class="sb-in" id="sel-ver" onchange="dirty()">
+          <option>V1</option><option>V2</option><option>V3</option><option>V4</option><option>V5</option>
+        </select>
+        <input class="sb-in" id="proj-date" type="date" oninput="dirty()">
+      </div>
+    </div>
+
+    <div>
+      <div class="sb-lbl">Allocation options</div>
+      <div class="assign-wrap" id="assign-wrap"></div>
+      <div class="assign-add-row">
+        <input id="assign-new" placeholder="New option..." onkeydown="if(event.key==='Enter')addAssignOpt()">
+        <button onclick="addAssignOpt()">+ Add</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="sb-lbl">Saved Projects</div>
+      <div class="saved-list" id="saved-list"></div>
+      <button class="btn" style="font-size:11px;margin-top:6px;width:100%" onclick="newProject()">+ New project</button>
+    </div>
+  </div>
+
+  <div class="main" id="main"></div>
+</div>
+
+<!-- PUSH TO ESTIMATE MODAL -->
+<div class="modal-bg" id="push-modal">
+  <div class="modal">
+    <h3>Push to Estimate</h3>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Choose which category to push this task to:</p>
+    <div id="push-opts"></div>
+    <div class="modal-btns">
+      <button class="btn" onclick="closeModal('push-modal')">Cancel</button>
+      <button class="btn primary" onclick="confirmPush()">Push</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD TO JOB BOARD MODAL -->
+<div class="modal-bg" id="jb-modal">
+  <div class="modal" style="min-width:480px;max-width:560px">
+    <h3>Add to Job Board — <span id="jb-task-name" style="color:var(--text2);font-weight:400"></span></h3>
+
+    <div class="modal-group">
+      <label class="modal-lbl">Ready by date</label>
+      <input type="date" id="jb-ready-by" class="modal-in">
+    </div>
+
+    <div class="modal-group">
+      <label class="modal-lbl" style="margin-bottom:8px">Production stages</label>
+      <div id="jb-stages-list"></div>
+    </div>
+
+    <div class="modal-group">
+      <label class="modal-lbl" style="margin-bottom:8px">Assigned crew</label>
+      <div id="jb-crew-section"></div>
+    </div>
+
+    <div class="modal-btns">
+      <button class="btn danger" onclick="removeFromJobBoard(pendingJobTask&&pendingJobTask.tid)">Remove from board</button>
+      <button class="btn" onclick="closeModal('jb-modal')">Cancel</button>
+      <button class="btn primary" onclick="confirmJobBoard()">Save to Job Board</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script src="/js/process.js"></script>
+</body>
+</html>

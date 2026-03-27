@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The/Lab — Job Board</title>
+<link rel="stylesheet" href="/css/style.css">
+<style>
+/* ── JOB BOARD SPECIFIC ── */
+.jb-toolbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.jb-filter-group{display:flex;gap:4px;align-items:center}
+.jb-filter-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-right:2px}
+.jb-chip{padding:4px 10px;font-size:11px;font-weight:500;border-radius:20px;cursor:pointer;border:1px solid var(--border);background:var(--bg);color:var(--text2);white-space:nowrap}
+.jb-chip:hover{color:var(--hi);border-color:var(--text2)}
+.jb-chip.active{background:var(--bg3);color:var(--hi);border-color:var(--text2)}
+.jb-select{background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--text);outline:none;cursor:pointer}
+.jb-select option{background:var(--bg2)}
+.jb-divider{width:1px;height:18px;background:var(--border);margin:0 4px}
+.view-toggle{display:flex;gap:2px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:2px}
+.vt-btn{font-size:11px;font-weight:500;padding:4px 12px;border-radius:4px;cursor:pointer;color:var(--text2);background:none;border:none}
+.vt-btn:hover{color:var(--hi)}
+.vt-btn.active{background:var(--bg2);color:var(--hi)}
+
+.jb-main{padding:20px 24px;overflow-y:auto;height:calc(100vh - 52px - 50px)}
+.jb-empty{text-align:center;padding:60px 20px;color:var(--text3);font-size:13px}
+.jb-empty-title{font-size:16px;font-weight:600;color:var(--text2);margin-bottom:8px}
+
+/* PROJECT VIEW */
+.proj-group{margin-bottom:24px}
+.proj-group-hdr{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.proj-group-name{font-size:14px;font-weight:600;color:var(--hi)}
+.proj-group-meta{font-size:11px;color:var(--text3)}
+.proj-group-count{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--bg3);color:var(--text2)}
+
+/* TASK CARD */
+.task-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:8px}
+.task-card:hover{border-color:var(--text3)}
+.task-card-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+.task-card-info{flex:1;min-width:0}
+.task-card-name{font-size:13px;font-weight:600;color:var(--hi);margin-bottom:2px}
+.task-card-sub{font-size:11px;color:var(--text3)}
+.task-card-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.status-badge{font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;cursor:pointer;border:none;white-space:nowrap;letter-spacing:.03em}
+.status-badge.upcoming{background:var(--bg3);color:var(--text2)}
+.status-badge.in-progress{background:#2a1e06;color:#fac775;border:1px solid #633806}
+.status-badge.done{background:#082010;color:#9fe1cb;border:1px solid #085041}
+.crew-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+.crew-tag{display:inline-flex;align-items:center;gap:4px;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-size:11px;color:var(--text2)}
+.ready-by{font-size:11px;color:var(--text2);display:flex;align-items:center;gap:4px}
+.ready-by-date{color:var(--hi);font-weight:500}
+
+/* PIPELINE */
+.pipeline{display:flex;align-items:flex-start;gap:0;margin-top:10px;overflow-x:auto;padding-bottom:2px}
+.pipe-stage{display:flex;flex-direction:column;align-items:center;min-width:80px;flex:1;position:relative}
+.pipe-stage:not(:last-child)::after{content:'→';position:absolute;right:-8px;top:10px;color:var(--text3);font-size:11px;z-index:1}
+.pipe-pill{font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap;text-align:center;width:100%;max-width:90px}
+.pipe-pill.enabled{background:var(--bg3);color:var(--hi)}
+.pipe-pill.disabled{background:transparent;color:var(--text3);text-decoration:line-through;border:1px dashed var(--bg3)}
+.pipe-dates{font-size:10px;color:var(--text3);margin-top:4px;text-align:center;line-height:1.4}
+.pipe-dates.has-date{color:var(--text2)}
+
+/* TASK VIEW */
+.task-list-hdr{display:grid;grid-template-columns:1fr 140px 160px 120px 80px;gap:8px;padding:6px 12px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);border-bottom:1px solid var(--border);margin-bottom:4px}
+.task-list-row{display:grid;grid-template-columns:1fr 140px 160px 120px 80px;gap:8px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;margin-bottom:4px;align-items:center;font-size:12px}
+.task-list-row:hover{border-color:var(--text3)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="logo" href="/">THE/LAB</a>
+  <div class="sep"></div>
+  <span style="font-size:12px;color:var(--text2)">Job Board</span>
+  <div class="tr-right">
+    <button class="btn ghost" onclick="refresh()">↻ Refresh</button>
+    <a href="/" class="btn ghost">← Dashboard</a>
+  </div>
+</div>
+
+<!-- FILTER TOOLBAR -->
+<div class="jb-toolbar">
+  <!-- View toggle -->
+  <div class="view-toggle">
+    <button class="vt-btn active" id="vt-project" onclick="setView('project')">Project view</button>
+    <button class="vt-btn"        id="vt-task"    onclick="setView('task')">Task view</button>
+  </div>
+
+  <div class="jb-divider"></div>
+
+  <!-- Status filter -->
+  <div class="jb-filter-group">
+    <span class="jb-filter-lbl">Status</span>
+    <button class="jb-chip active" data-status="all"         onclick="setStatusFilter('all')">All</button>
+    <button class="jb-chip"        data-status="upcoming"    onclick="setStatusFilter('upcoming')">Upcoming</button>
+    <button class="jb-chip"        data-status="in-progress" onclick="setStatusFilter('in-progress')">In Progress</button>
+    <button class="jb-chip"        data-status="done"        onclick="setStatusFilter('done')">Done</button>
+  </div>
+
+  <div class="jb-divider"></div>
+
+  <!-- People / Dept filter -->
+  <div class="jb-filter-group">
+    <span class="jb-filter-lbl">Filter</span>
+    <button class="jb-chip active" id="filter-all" onclick="setPersonFilter('all','all')">All</button>
+    <select class="jb-select" id="filter-dept" onchange="onDeptFilterChange(this.value)">
+      <option value="">Department...</option>
+    </select>
+    <select class="jb-select" id="filter-person" onchange="onPersonFilterChange(this.value)">
+      <option value="">Person...</option>
+    </select>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="jb-main" id="jb-main"></div>
+
+<script src="/js/app.js"></script>
+<script src="/js/jobs.js"></script>
+</body>
+</html>

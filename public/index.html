@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The/Lab</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="topbar">
+  <a class="logo" href="/">THE/LAB</a>
+  <div class="sep"></div>
+  <div class="view-switcher" id="view-switcher">
+    <button class="vs-btn" onclick="setViewMode('employee')">Employee</button>
+    <button class="vs-btn" onclick="setViewMode('teamleader')">Team Leader</button>
+    <button class="vs-btn" onclick="setViewMode('admin')">Admin</button>
+  </div>
+  <div class="sep"></div>
+  <select class="name-picker" id="name-picker" onchange="setEmployee(this.value)">
+    <option value="">— Who are you? —</option>
+  </select>
+  <div class="tr-right">
+    <a href="/settings.html" class="btn ghost" id="settings-link" style="text-decoration:none">⚙ Settings</a>
+  </div>
+</div>
+
+<div style="overflow-y:auto;height:calc(100vh - 52px)">
+  <div class="dash-wrap">
+
+    <!-- HEADER -->
+    <div class="dash-header">
+      <div class="dash-greeting" id="dash-greeting">Welcome to The/Lab</div>
+      <div class="dash-sub" id="dash-sub">Select your name and role above to get started.</div>
+    </div>
+
+    <!-- TEAM LEADER MESSAGE -->
+    <div id="msg-section" style="display:none">
+      <div class="msg-card" id="msg-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <div class="msg-card-from" id="msg-from">FROM YOUR TEAM LEADER</div>
+          <button class="msg-card-edit" id="msg-edit-btn" onclick="toggleEditMessage()" style="display:none">Edit</button>
+        </div>
+        <div id="msg-display">
+          <p class="msg-card-text" id="msg-text" style="color:var(--text3);font-style:italic">No message from your team leader yet.</p>
+        </div>
+        <div id="msg-edit-form" style="display:none">
+          <textarea class="msg-textarea" id="msg-input" placeholder="Write a message for your team..." rows="3"></textarea>
+          <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end">
+            <button class="btn ghost" onclick="cancelEditMessage()">Cancel</button>
+            <button class="btn primary" onclick="saveMessage()">Save message</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUICK LAUNCH -->
+    <div class="dash-section">
+      <div class="dash-section-hdr">
+        <span class="dash-section-title">Tools</span>
+      </div>
+      <div class="dash-grid" id="tool-cards"></div>
+    </div>
+
+    <!-- RECENT PROJECTS -->
+    <div class="dash-section" id="recent-section" style="display:none">
+      <div class="dash-section-hdr">
+        <span class="dash-section-title">Recent projects</span>
+        <a href="/estimate.html" class="btn ghost" style="font-size:11px">Open Estimate tool →</a>
+      </div>
+      <div id="recent-list"></div>
+    </div>
+
+    <!-- JOBS THIS WEEK (placeholder — needs Job Board) -->
+    <div class="dash-section" id="jobs-section" style="display:none">
+      <div class="dash-section-hdr">
+        <span class="dash-section-title">Your jobs this week</span>
+        <a href="/jobs.html" class="btn ghost" style="font-size:11px">View all →</a>
+      </div>
+      <div id="jobs-week-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+(function() {
+  const ALL_TOOLS = [
+    {id:'estimate', href:'/estimate.html', icon:'▦', title:'Estimate Tool',    desc:'Build detailed project estimates with costs, margins, and multi-currency support.', roles:['teamleader','admin']},
+    {id:'process',  href:'/process.html',  icon:'◫', title:'Process Planner',  desc:'Plan production phases, assign crew, and push tasks to the estimate.', roles:['teamleader','admin']},
+    {id:'jobs',     href:'/jobs.html',     icon:'☰', title:'Job Board',        desc:'Track active jobs, filter by person or department, and update task status.', roles:['employee','teamleader','admin']},
+    {id:'settings', href:'/settings.html', icon:'⚙', title:'Settings',         desc:'Manage departments, employees, rates, and export preferences.', roles:['admin']},
+  ];
+
+  let session = App.getSession();
+
+  function render() {
+    session = App.getSession();
+    const {viewMode, employeeId} = session;
+
+    // View switcher highlight
+    document.querySelectorAll('.vs-btn').forEach((btn, i) => {
+      const modes = ['employee','teamleader','admin'];
+      btn.classList.toggle('active', modes[i] === viewMode);
+    });
+
+    // Settings link visibility
+    document.getElementById('settings-link').style.display = App.canAccess('settings') ? '' : 'none';
+
+    // Populate name picker
+    const picker = document.getElementById('name-picker');
+    const global = App.getGlobal();
+    const employees = global.employees || [];
+    picker.innerHTML = '<option value="">— Who are you? —</option>' +
+      employees.map(e => `<option value="${e.id}"${e.id===employeeId?' selected':''}>${esc(e.name)}</option>`).join('');
+
+    // Greeting
+    const emp = employees.find(e => e.id === employeeId);
+    const greetingEl = document.getElementById('dash-greeting');
+    const subEl = document.getElementById('dash-sub');
+    if (emp) {
+      const hour = new Date().getHours();
+      const timeGreet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+      greetingEl.textContent = timeGreet + ', ' + emp.name.split(' ')[0] + '.';
+      subEl.textContent = viewMode === 'admin' ? 'Admin view' : viewMode === 'teamleader' ? 'Team Leader view' : 'Employee view';
+    } else {
+      greetingEl.textContent = 'Welcome to The/Lab';
+      subEl.textContent = 'Select your name and role above to get started.';
+    }
+
+    // Tool cards
+    const toolCards = document.getElementById('tool-cards');
+    toolCards.innerHTML = ALL_TOOLS
+      .filter(t => t.roles.includes(viewMode))
+      .map(t => `<a href="${t.href}" class="nav-card">
+        <div class="nav-card-icon">${t.icon}</div>
+        <div class="nav-card-title">${t.title}</div>
+        <div class="nav-card-desc">${t.desc}</div>
+      </a>`).join('');
+
+    // Team leader message
+    renderMessage(emp, viewMode, global);
+
+    // Recent projects (TL + Admin)
+    const recentSection = document.getElementById('recent-section');
+    if (App.canAccess('estimate') || App.canAccess('process')) {
+      recentSection.style.display = '';
+      renderRecentProjects();
+    } else {
+      recentSection.style.display = 'none';
+    }
+
+    // Jobs this week
+    renderJobsThisWeek(emp, viewMode);
+  }
+
+  function renderMessage(emp, viewMode, global) {
+    const msgSection = document.getElementById('msg-section');
+    const depts = global.departments || [];
+
+    // Find this employee's department
+    let deptMsg = null, deptName = '';
+    if (emp) {
+      const dept = depts.find(d => d.id === emp.deptId);
+      if (dept) {
+        deptName = dept.name;
+        deptMsg = dept.teamLeaderMessage || '';
+      }
+    } else if (depts.length > 0) {
+      // No employee selected — show first dept message if TL/Admin
+      if (viewMode !== 'employee') {
+        deptName = depts[0].name;
+        deptMsg = depts[0].teamLeaderMessage || '';
+      }
+    }
+
+    if (deptMsg === null && viewMode === 'employee') {
+      msgSection.style.display = 'none';
+      return;
+    }
+
+    msgSection.style.display = '';
+    document.getElementById('msg-from').textContent = deptName ? 'FROM ' + deptName.toUpperCase() + ' — TEAM LEADER' : 'FROM YOUR TEAM LEADER';
+
+    const msgText = document.getElementById('msg-text');
+    if (deptMsg) {
+      msgText.textContent = deptMsg;
+      msgText.style.color = '';
+      msgText.style.fontStyle = '';
+    } else {
+      msgText.textContent = 'No message from your team leader yet.';
+      msgText.style.color = 'var(--text3)';
+      msgText.style.fontStyle = 'italic';
+    }
+
+    // Show edit button only for TL/Admin
+    const editBtn = document.getElementById('msg-edit-btn');
+    editBtn.style.display = App.canAccess('postMessage') ? '' : 'none';
+  }
+
+  function toggleEditMessage() {
+    const display = document.getElementById('msg-display');
+    const form = document.getElementById('msg-edit-form');
+    const inp = document.getElementById('msg-input');
+    const isEditing = form.style.display !== 'none';
+    display.style.display = isEditing ? '' : 'none';
+    form.style.display = isEditing ? 'none' : '';
+    if (!isEditing) {
+      const global = App.getGlobal();
+      const emp = (global.employees || []).find(e => e.id === session.employeeId);
+      const dept = emp ? (global.departments || []).find(d => d.id === emp.deptId) : null;
+      inp.value = (dept && dept.teamLeaderMessage) || '';
+      inp.focus();
+    }
+  }
+
+  function cancelEditMessage() {
+    document.getElementById('msg-display').style.display = '';
+    document.getElementById('msg-edit-form').style.display = 'none';
+  }
+
+  function saveMessage() {
+    const text = document.getElementById('msg-input').value.trim();
+    const global = App.getGlobal();
+    const emp = (global.employees || []).find(e => e.id === session.employeeId);
+
+    // Find target dept — TL saves to their dept, Admin can pick (for now saves to first dept or emp dept)
+    let deptId = emp ? emp.deptId : (global.departments[0] && global.departments[0].id);
+    if (!deptId && global.departments.length) deptId = global.departments[0].id;
+
+    if (deptId) {
+      const dept = global.departments.find(d => d.id === deptId);
+      if (dept) dept.teamLeaderMessage = text;
+    }
+    App.saveGlobal(global);
+    cancelEditMessage();
+    render();
+  }
+
+  function renderRecentProjects() {
+    const list = document.getElementById('recent-list');
+    const projects = App.getSavedProjects().slice(0, 8);
+    if (!projects.length) {
+      list.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:8px 0">No saved projects yet. Open the Estimate tool to start one.</div>';
+      return;
+    }
+    list.innerHTML = projects.map(p => {
+      const date = p.date ? new Date(p.date).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) : '';
+      const saved = p.savedAt ? new Date(p.savedAt).toLocaleDateString('en-GB', {day:'numeric',month:'short'}) : '';
+      return `<div class="proj-card" onclick="openProject('${p._key}')">
+        <div style="flex:1">
+          <div class="proj-card-name">${esc(p.name||'Untitled')}</div>
+          <div class="proj-card-meta">${[esc(p.client||''), esc(p.version||''), date].filter(Boolean).join(' · ')}</div>
+        </div>
+        ${saved ? `<div class="proj-card-meta">Saved ${saved}</div>` : ''}
+        <div class="proj-card-status">${esc(p.status||'active')}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function openProject(key) {
+    const d = App.loadProjectByKey(key);
+    if (!d) return;
+    // Save as draft so estimate.html picks it up
+    App.saveDraft({
+      key, name:d.name||'', client:d.client||'', version:d.version||'V1',
+      date:d.date||'', currency:d.currency||'DKK', status:d.status||'active',
+    }, d.S);
+    window.location.href = '/estimate.html';
+  }
+
+  function renderJobsThisWeek(emp, viewMode) {
+    const jobsSection = document.getElementById('jobs-section');
+    const list = document.getElementById('jobs-week-list');
+
+    // Gather all job tasks from all projects
+    const projects = App.getSavedProjects();
+    const now = new Date();
+    const weekStart = new Date(now); weekStart.setDate(now.getDate() - now.getDay() + 1); weekStart.setHours(0,0,0,0);
+    const weekEnd   = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6); weekEnd.setHours(23,59,59,999);
+
+    const thisWeek = [];
+    projects.forEach(p => {
+      (p.jobTasks || []).forEach(jt => {
+        // Check if any stage date falls this week
+        const dates = [];
+        if (jt.readyByDate) dates.push(jt.readyByDate);
+        const stages = jt.stages || {};
+        Object.values(stages).forEach(s => {
+          if (s.enabled) {
+            if (s.startDate) dates.push(s.startDate);
+            if (s.endDate)   dates.push(s.endDate);
+            if (s.date)      dates.push(s.date);
+          }
+        });
+        const inWeek = dates.some(d => { const dd = new Date(d); return dd >= weekStart && dd <= weekEnd; });
+
+        // Filter by employee if identified
+        const assignedToMe = !emp || (jt.assignedTo || []).some(a => a.employeeId === emp.id || a.name === emp.name);
+
+        if (inWeek && (viewMode !== 'employee' || assignedToMe)) {
+          thisWeek.push({...jt, projectName: p.name||'Untitled', projectKey: p._key});
+        }
+      });
+    });
+
+    if (thisWeek.length === 0 && viewMode === 'employee' && emp) {
+      list.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:8px 0">No jobs assigned to you this week.</div>';
+      jobsSection.style.display = '';
+      return;
+    }
+
+    if (thisWeek.length === 0) {
+      jobsSection.style.display = 'none';
+      return;
+    }
+
+    jobsSection.style.display = '';
+    list.innerHTML = thisWeek.map(jt => {
+      const statusColors = {upcoming:'var(--text3)',  'in-progress':'#fac775', done:'#9fe1cb'};
+      const color = statusColors[jt.status] || 'var(--text3)';
+      return `<div class="proj-card">
+        <div style="flex:1">
+          <div class="proj-card-name">${esc(jt.name)}</div>
+          <div class="proj-card-meta">${esc(jt.projectName)}${jt.readyByDate?' · Ready '+jt.readyByDate:''}</div>
+        </div>
+        <div style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--bg3);color:${color}">${esc(jt.status||'upcoming')}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── GLOBAL FUNCTIONS ──
+  window.setViewMode = function(mode) {
+    session.viewMode = mode;
+    App.saveSession(session);
+    render();
+  };
+  window.setEmployee = function(id) {
+    session.employeeId = id || null;
+    App.saveSession(session);
+    render();
+  };
+  window.toggleEditMessage = toggleEditMessage;
+  window.cancelEditMessage = cancelEditMessage;
+  window.saveMessage = saveMessage;
+  window.openProject = openProject;
+
+  render();
+})();
+</script>
+</body>
+</html>

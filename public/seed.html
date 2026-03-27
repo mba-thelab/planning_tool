@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The/Lab — Seed test data</title>
+<style>
+  body{font-family:system-ui;background:#1a1a18;color:#d3d1c7;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
+  .box{background:#2c2c2a;border:1px solid #3d3d3a;border-radius:12px;padding:32px 40px;max-width:480px;text-align:center}
+  h2{color:#f1efe8;margin-bottom:8px}
+  p{font-size:13px;color:#888780;margin-bottom:20px;line-height:1.6}
+  .btn{display:inline-block;padding:10px 24px;background:#f1efe8;color:#1a1a18;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer}
+  .btn:hover{background:#d3d1c7}
+  .btn.danger{background:#501313;color:#f09595;margin-left:8px}
+  .log{text-align:left;font-size:11px;color:#9fe1cb;background:#083018;border-radius:6px;padding:12px;margin-top:16px;line-height:1.8;display:none}
+</style>
+</head>
+<body>
+<div class="box">
+  <h2>Seed test data</h2>
+  <p>This will populate The/Lab with a complete test job — departments, employees, a full estimate, process plan, and job board entries.<br><br>Any existing <strong>thelab_global</strong> and the test project will be overwritten.</p>
+  <button class="btn" onclick="seed()">Seed &amp; open dashboard</button>
+  <button class="btn danger" onclick="clearAll()">Clear all data</button>
+  <div class="log" id="log"></div>
+</div>
+
+<script>
+function log(msg) {
+  const el = document.getElementById('log');
+  el.style.display = 'block';
+  el.innerHTML += msg + '<br>';
+}
+
+function clearAll() {
+  Object.keys(localStorage).filter(k => k.startsWith('thelab_')).forEach(k => localStorage.removeItem(k));
+  log('✓ All thelab_ data cleared');
+}
+
+function seed() {
+  // ── IDs ──
+  const ID = {
+    // Departments
+    deptSB:   'dept_setbuild',
+    deptProd: 'dept_production',
+    deptBook: 'dept_booking',
+    // Sub-departments
+    sdPaint:  'sd_paint',
+    sdCarp:   'sd_carpentry',
+    sdMetal:  'sd_metalwork',
+    sdLog:    'sd_logistics',
+    sdTech:   'sd_technical',
+    // Employees
+    empLars:   'emp_lars',
+    empSofie:  'emp_sofie',
+    empJens:   'emp_jens',
+    empMaria:  'emp_maria',
+    empThomas: 'emp_thomas',
+    empAdmin:  'emp_admin',
+    // Estimate sections
+    secLab:  'sec_labour',
+    secMat:  'sec_materials',
+    secTech: 'sec_technical',
+    // Estimate rows
+    rPM:       'row_pm',
+    rCrew:     'row_crew',
+    rElec:     'row_elec',
+    rPainter:  'row_painter',
+    rSteel:    'row_steel',
+    rLED:      'row_led',
+    rAcoustic: 'row_acoustic',
+    rPaintMat: 'row_paintmat',
+    rFixings:  'row_fixings',
+    rLift:     'row_lift',
+    rWaste:    'row_waste',
+    rTravel:   'row_travel',
+    // Process phases
+    phPrep: 'ph_prep',
+    phExt:  'ph_ext',
+    phD1:   'ph_d1',
+    phD2:   'ph_d2',
+    phD3:   'ph_d3',
+    // Process tasks
+    tkSurvey:   'tk_survey',
+    tkOrder:    'tk_order',
+    tkBrief:    'tk_brief',
+    tkElec:     'tk_elec',
+    tkDelivery: 'tk_delivery',
+    tkProtect:  'tk_protect',
+    tkSteel:    'tk_steel',
+    tkCable:    'tk_cable',
+    tkPanels:   'tk_panels',
+    tkLED:      'tk_led',
+    tkPaint1:   'tk_paint1',
+    tkPaint2:   'tk_paint2',
+    tkLight:    'tk_lighting',
+    tkSnag:     'tk_snagging',
+    tkHandover: 'tk_handover',
+    // Job tasks
+    jtSteel:    'jt_steel',
+    jtPanels:   'jt_panels',
+    jtPaint1:   'jt_paint1',
+    jtLight:    'jt_lighting',
+    jtHandover: 'jt_handover',
+  };
+
+  // ── GLOBAL SETTINGS ──
+  const global = {
+    departments: [
+      {
+        id: ID.deptSB,
+        name: 'Set Build',
+        subDepts: [
+          {id: ID.sdPaint, name: 'Paint'},
+          {id: ID.sdCarp,  name: 'Carpentry'},
+          {id: ID.sdMetal, name: 'Metalwork'},
+        ],
+        teamLeaderId: ID.empLars,
+        teamLeaderMessage: 'Big week ahead — Aesop Flagship starts Tuesday. Check your assigned tasks on the Job Board and confirm your availability by end of day. Day 1 call time is 07:30 on site.',
+      },
+      {
+        id: ID.deptProd,
+        name: 'Production',
+        subDepts: [
+          {id: ID.sdLog,  name: 'Logistics'},
+          {id: ID.sdTech, name: 'Technical'},
+        ],
+        teamLeaderId: ID.empThomas,
+        teamLeaderMessage: 'Scissor lift booked for Tues–Thu. Thomas to confirm delivery window with site manager Monday morning.',
+      },
+      {
+        id: ID.deptBook,
+        name: 'Booking',
+        subDepts: [],
+        teamLeaderId: null,
+        teamLeaderMessage: '',
+      },
+    ],
+    employees: [
+      {id: ID.empLars,   name: 'Lars Jensen',        deptId: ID.deptSB,   subDeptId: ID.sdCarp,  role: 'teamleader'},
+      {id: ID.empSofie,  name: 'Sofie Andersen',     deptId: ID.deptSB,   subDeptId: ID.sdPaint, role: 'employee'},
+      {id: ID.empJens,   name: 'Jens Nielsen',        deptId: ID.deptSB,   subDeptId: ID.sdMetal, role: 'employee'},
+      {id: ID.empMaria,  name: 'Maria Christensen',   deptId: ID.deptSB,   subDeptId: ID.sdPaint, role: 'employee'},
+      {id: ID.empThomas, name: 'Thomas Berg',         deptId: ID.deptProd, subDeptId: ID.sdLog,   role: 'teamleader'},
+      {id: ID.empAdmin,  name: 'Admin',               deptId: null,        subDeptId: null,       role: 'admin'},
+    ],
+    jobStages: [
+      {id: 'build',    name: 'Build',    hasDateRange: true},
+      {id: 'paint',    name: 'Paint',    hasDateRange: true},
+      {id: 'delivery', name: 'Delivery', hasDateRange: false},
+      {id: 'ongoing',  name: 'Ongoing',  hasDateRange: false},
+      {id: 'strike',   name: 'Strike',   hasDateRange: false},
+    ],
+    rates: {defaultSaleRate: 850, defaultCostRate: 580, targetMargin: 20},
+    appearance: {logoText: 'THE/LAB', theme: 'dark', font: 'system'},
+    exportDefaults: {
+      footerText: 'All prices are estimates and exclude VAT',
+      showColumns: ['description','spec','qty','sale','price_dkk','cost','cost_dkk','margin','note'],
+      coverPage: false,
+    },
+  };
+
+  localStorage.setItem('thelab_global', JSON.stringify(global));
+  log('✓ Global settings written (departments, employees, stages, rates)');
+
+  // Mirror to old settings key for backward compat
+  localStorage.setItem('thelab_settings', JSON.stringify({
+    logoText: 'THE/LAB',
+    footerText: 'All prices are estimates and exclude VAT',
+    defaultSaleRate: 850,
+    defaultCostRate: 580,
+    coverPageDefault: false,
+    allocationOptions: ['Lars Jensen', 'Sofie Andersen', 'Jens Nielsen', 'Maria Christensen', 'Thomas Berg', 'External'],
+    rateCard: [
+      {id:'rc1', name:'Project manager',     spec:'On-site coordination', unit:'days', sale:4800, cost:3200},
+      {id:'rc2', name:'Carpenter / builder', spec:'Skilled trades',       unit:'days', sale:3600, cost:2400},
+      {id:'rc3', name:'Painter',             spec:'Brush + roller',       unit:'days', sale:3200, cost:2100},
+      {id:'rc4', name:'Electrician',         spec:'Certified external',   unit:'days', sale:6500, cost:5200},
+      {id:'rc5', name:'Steel framing',       spec:'60x40mm powder-coat',  unit:'lin.m',sale:185,  cost:110},
+      {id:'rc6', name:'LED strip lighting',  spec:'24V 14W/m warm white', unit:'m',    sale:320,  cost:195},
+    ],
+  }));
+
+  // ── JOB TASKS (defined separately so they appear at both top-level and inside S) ──
+  const JOB_TASKS = [
+    {
+      id:          ID.jtSteel,
+      taskId:      ID.tkSteel,
+      phaseId:     ID.phD1,
+      name:        'Steel framing installation',
+      spec:        'Wall A, B & C — check plumb',
+      crew:        2,
+      hrs:         7,
+      assignedTo:  [
+        {employeeId: ID.empJens,  name: 'Jens Nielsen'},
+        {employeeId: ID.empLars,  name: 'Lars Jensen'},
+      ],
+      readyByDate: '2026-03-31',
+      stages: {
+        build:    {enabled:true,  startDate:'2026-03-31', endDate:'2026-03-31'},
+        paint:    {enabled:false},
+        delivery: {enabled:false},
+        ongoing:  {enabled:false},
+        strike:   {enabled:false},
+      },
+      status: 'done',
+    },
+    {
+      id:          ID.jtPanels,
+      taskId:      ID.tkPanels,
+      phaseId:     ID.phD2,
+      name:        'Acoustic panel installation',
+      spec:        'Adhesive + mechanical fix, 2mm shadow gap',
+      crew:        2,
+      hrs:         8,
+      assignedTo:  [
+        {employeeId: ID.empJens,  name: 'Jens Nielsen'},
+        {employeeId: ID.empLars,  name: 'Lars Jensen'},
+      ],
+      readyByDate: '2026-04-01',
+      stages: {
+        build:    {enabled:true,  startDate:'2026-04-01', endDate:'2026-04-01'},
+        paint:    {enabled:false},
+        delivery: {enabled:false},
+        ongoing:  {enabled:false},
+        strike:   {enabled:false},
+      },
+      status: 'in-progress',
+    },
+    {
+      id:          ID.jtPaint1,
+      taskId:      ID.tkPaint1,
+      phaseId:     ID.phD2,
+      name:        'Joinery painting',
+      spec:        'First + second coat, Farrow & Ball Railings',
+      crew:        1,
+      hrs:         9,
+      assignedTo:  [
+        {employeeId: ID.empMaria,  name: 'Maria Christensen'},
+        {employeeId: ID.empSofie,  name: 'Sofie Andersen'},
+      ],
+      readyByDate: '2026-04-02',
+      stages: {
+        build:    {enabled:false},
+        paint:    {enabled:true, startDate:'2026-04-01', endDate:'2026-04-02'},
+        delivery: {enabled:false},
+        ongoing:  {enabled:false},
+        strike:   {enabled:false},
+      },
+      status: 'upcoming',
+    },
+    {
+      id:          ID.jtLight,
+      taskId:      ID.tkLight,
+      phaseId:     ID.phD3,
+      name:        'Final lighting commissioning',
+      spec:        'Scene programming + client walkthrough',
+      crew:        2,
+      hrs:         3,
+      assignedTo:  [
+        {employeeId: ID.empLars,   name: 'Lars Jensen'},
+        {employeeId: ID.empSofie,  name: 'Sofie Andersen'},
+      ],
+      readyByDate: '2026-04-02',
+      stages: {
+        build:    {enabled:false},
+        paint:    {enabled:false},
+        delivery: {enabled:false},
+        ongoing:  {enabled:true},
+        strike:   {enabled:false},
+      },
+      status: 'in-progress',
+    },
+    {
+      id:          ID.jtHandover,
+      taskId:      ID.tkHandover,
+      phaseId:     ID.phD3,
+      name:        'Site clean & handover',
+      spec:        'Keys to store manager',
+      crew:        2,
+      hrs:         2,
+      assignedTo:  [
+        {employeeId: ID.empLars,   name: 'Lars Jensen'},
+        {employeeId: ID.empThomas, name: 'Thomas Berg'},
+      ],
+      readyByDate: '2026-04-03',
+      stages: {
+        build:    {enabled:false},
+        paint:    {enabled:false},
+        delivery: {enabled:true,  date:'2026-04-03'},
+        ongoing:  {enabled:false},
+        strike:   {enabled:true,  date:'2026-04-10'},
+      },
+      status: 'upcoming',
+    },
+  ];
+
+  // ── PROJECT ──
+  const projKey = 'thelab_proj_test001';
+
+  const projectData = {
+    key:      projKey,
+    name:     'Flagship Store — Fit-Out',
+    client:   'Aesop Nordic',
+    version:  'V2',
+    date:     '2026-03-31',
+    currency: 'DKK',
+    status:   'active',
+    savedAt:  Date.now(),
+    jobTasks: JOB_TASKS,  // top-level: read by jobs.js loadAllTasks()
+    overrides: {},
+
+    // ── ESTIMATE ──
+    S: {
+      estimate: {
+        sections: [
+          {
+            id: ID.secLab,
+            name: 'Labour',
+            rows: [
+              {id:ID.rPM,      what:'Project manager',       spec:'On-site coordination',   qty:'4',  unit:'days', sale:'4800', cost:'3200', note:'Lars — incl. daily reporting'},
+              {id:ID.rCrew,    what:'Installation crew',     spec:'2-person set build team', qty:'6',  unit:'days', sale:'3600', cost:'2400', note:'Jens + Sofie'},
+              {id:ID.rElec,    what:'Electrician',           spec:'Certified external',      qty:'2',  unit:'days', sale:'6500', cost:'5200', note:'Sparks ApS — booked'},
+              {id:ID.rPainter, what:'Finisher / painter',    spec:'Touch-up & detailing',    qty:'2',  unit:'days', sale:'3200', cost:'2100', note:'Maria — Day 2 & 3'},
+            ],
+          },
+          {
+            id: ID.secMat,
+            name: 'Materials',
+            rows: [
+              {id:ID.rSteel,    what:'Steel wall framing',    spec:'60x40mm powder-coated black', qty:'48',  unit:'lin.m', sale:'185', cost:'110', note:'RAL 9005 — 8-day lead'},
+              {id:ID.rLED,      what:'LED strip lighting',    spec:'24V 14W/m warm white',        qty:'32',  unit:'m',     sale:'320', cost:'195', note:'Incl. drivers & connectors'},
+              {id:ID.rAcoustic, what:'Acoustic panel',        spec:'12mm felt, light grey',       qty:'24',  unit:'m²',    sale:'680', cost:'420', note:'Custom cut — confirm dims'},
+              {id:ID.rPaintMat, what:'Joinery paint',         spec:'Farrow & Ball Railings No.31',qty:'8',   unit:'l',     sale:'290', cost:'175', note:'2 coats required'},
+              {id:ID.rFixings,  what:'Fixings & consumables', spec:'Misc hardware',               qty:'1',   unit:'pcs',   sale:'2400',cost:'1600',note:''},
+            ],
+          },
+          {
+            id: ID.secTech,
+            name: 'Technical',
+            rows: [
+              {id:ID.rLift,   what:'Scissor lift rental', spec:'8m working height',   qty:'3', unit:'days', sale:'2200', cost:'1650', note:'Booked — confirm delivery window'},
+              {id:ID.rWaste,  what:'Waste disposal',      spec:'Skip hire + labour',  qty:'1', unit:'pcs',  sale:'1800', cost:'1400', note:''},
+              {id:ID.rTravel, what:'Travel & logistics',  spec:'Van + fuel, 4 trips', qty:'4', unit:'days', sale:'650',  cost:'480',  note:''},
+            ],
+          },
+        ],
+      },
+
+      // ── PROCESS ──
+      process: {
+        phases: [
+          {
+            id: ID.phPrep, key:'prep', label:'Preparation', bg:'#0c447c', text:'#b5d4f4',
+            tasks: [
+              {id:ID.tkSurvey,   name:'Site survey & measurements',    spec:'Full floor plan + ceiling heights', crew:2, hrs:4, hold:'Lars Jensen',  note:'Bring laser measure + camera'},
+              {id:ID.tkOrder,    name:'Material order & procurement',   spec:'Steel, panels, LED, paint',        crew:1, hrs:6, hold:'Lars Jensen',  note:'8-day lead on panels — order Mon'},
+              {id:ID.tkBrief,    name:'Team briefing & drawing review', spec:'Review install drawings rev.4',    crew:5, hrs:2, hold:'Lars Jensen',  note:'Monday 09:00 at workshop'},
+            ],
+          },
+          {
+            id: ID.phExt, key:'ext', label:'External', bg:'#633806', text:'#fac775',
+            tasks: [
+              {id:ID.tkElec,     name:'Electrical first-fix',           spec:'Conduit & cable runs per drawing', crew:2, hrs:8, hold:'External',     note:'Sparks ApS — confirm Mon AM'},
+              {id:ID.tkDelivery, name:'Material delivery to site',      spec:'Steel + panels + LED stock',       crew:1, hrs:3, hold:'Thomas Berg',  note:'Thomas to meet driver on site'},
+            ],
+          },
+          {
+            id: ID.phD1, key:'d1', label:'Day 1',  bg:'#085041', text:'#9fe1cb',
+            tasks: [
+              {id:ID.tkProtect, name:'Site protection & setup',         spec:'Floor covering, hoarding, dust screens', crew:2, hrs:3, hold:'Jens Nielsen',  note:''},
+              {id:ID.tkSteel,   name:'Steel framing installation',      spec:'Wall A, B & C — check plumb',            crew:2, hrs:7, hold:'Jens Nielsen',  note:'Start with Wall A — longest run'},
+              {id:ID.tkCable,   name:'Cable pulling',                   spec:'LED circuits per zone plan',             crew:2, hrs:5, hold:'Sofie Andersen', note:'Follow electrical drawing rev.3'},
+            ],
+          },
+          {
+            id: ID.phD2, key:'d2', label:'Day 2',  bg:'#3c3489', text:'#cecbf6',
+            tasks: [
+              {id:ID.tkPanels, name:'Acoustic panel installation',     spec:'Adhesive + mechanical fix, 2mm shadow gap', crew:2, hrs:8, hold:'Jens Nielsen',     note:'Leave shadow gap — check alignment'},
+              {id:ID.tkLED,    name:'LED strip & driver fit-off',      spec:'Test each zone before moving on',           crew:2, hrs:6, hold:'Sofie Andersen',   note:'Zone map on drawing rev.3'},
+              {id:ID.tkPaint1, name:'Joinery painting — first coat',   spec:'Brush apply, back-roll',                    crew:1, hrs:5, hold:'Maria Christensen', note:'Allow min 4h dry before second coat'},
+            ],
+          },
+          {
+            id: ID.phD3, key:'d3', label:'Day 3',  bg:'#712b13', text:'#f5c4b3',
+            tasks: [
+              {id:ID.tkPaint2,   name:'Painting — second coat & touch-up', spec:'',                              crew:1, hrs:4, hold:'Maria Christensen', note:''},
+              {id:ID.tkLight,    name:'Final lighting commissioning',       spec:'Scene programming + client walkthrough', crew:2, hrs:3, hold:'Lars Jensen',      note:'Client (Nina Holm) present — 14:00'},
+              {id:ID.tkSnag,     name:'Snagging & defect list',             spec:'Full walkthrough, photograph',  crew:4, hrs:3, hold:'Lars Jensen',      note:''},
+              {id:ID.tkHandover, name:'Site clean & handover',              spec:'Keys to store manager',         crew:2, hrs:2, hold:'Lars Jensen',      note:'Hand to Anders Møller — store mgr'},
+            ],
+          },
+        ],
+      },
+
+      // ── JOB TASKS (on board) ──
+      jobTasks: JOB_TASKS,  // also inside S: read by process.js to mark "+ Job Board" buttons
+
+      assignOpts: ['Lars Jensen', 'Sofie Andersen', 'Jens Nielsen', 'Maria Christensen', 'Thomas Berg', 'External'],
+      overrides: {},
+    },
+  };
+
+  localStorage.setItem(projKey, JSON.stringify(projectData));
+  log('✓ Project written: Flagship Store — Fit-Out / Aesop Nordic');
+  log('✓ Estimate: 12 rows across Labour, Materials, Technical');
+  log('✓ Process: 5 phases, 15 tasks');
+  log('✓ Job Board: 5 tasks with stages, dates & crew');
+
+  // Set session to admin so everything is visible
+  localStorage.setItem('thelab_session', JSON.stringify({employeeId: ID.empAdmin, viewMode: 'admin'}));
+  log('✓ Session set to Admin');
+
+  // Clear any stale draft
+  localStorage.removeItem('thelab_draft');
+  localStorage.removeItem('thelab_autosave');
+  log('✓ Draft cleared');
+
+  log('');
+  log('↳ Redirecting to dashboard...');
+  setTimeout(() => { window.location.href = '/'; }, 1200);
+}
+</script>
+</body>
+</html>

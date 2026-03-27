@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The/Lab — Settings</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="topbar">
+  <a class="logo" href="/">THE/LAB</a>
+  <div class="sep"></div>
+  <span style="font-size:12px;color:var(--text2)">Settings</span>
+  <div class="tr-right">
+    <a href="/" class="btn ghost">← Dashboard</a>
+  </div>
+</div>
+
+<div style="overflow-y:auto;height:calc(100vh - 52px)">
+  <div class="settings-wrap">
+
+    <div style="margin-bottom:24px">
+      <div style="font-size:18px;font-weight:600;color:var(--hi);margin-bottom:4px">Settings</div>
+      <div style="font-size:12px;color:var(--text2)">Global configuration — applies to all projects unless overridden per-project.</div>
+    </div>
+
+    <!-- TABS -->
+    <div class="settings-tabs">
+      <div class="stab active" onclick="switchTab('org')">People &amp; Org</div>
+      <div class="stab" onclick="switchTab('defaults')">Defaults</div>
+      <div class="stab" onclick="switchTab('stages')">Job Stages</div>
+      <div class="stab" onclick="switchTab('appearance')">Appearance</div>
+      <div class="stab" onclick="switchTab('export')">Export</div>
+    </div>
+
+    <!-- PEOPLE & ORG -->
+    <div class="stab-panel active" id="panel-org">
+
+      <div class="set-group">
+        <div class="set-group-title">Departments</div>
+        <div id="dept-list"></div>
+        <button class="add-inline-btn" onclick="addDept()">+ Add department</button>
+      </div>
+
+      <div class="set-group" style="margin-top:24px">
+        <div class="set-group-title">Employees</div>
+        <div id="emp-list"></div>
+        <button class="add-inline-btn" onclick="openEmpModal(null)">+ Add employee</button>
+      </div>
+
+    </div>
+
+    <!-- DEFAULTS -->
+    <div class="stab-panel" id="panel-defaults">
+      <div class="set-group">
+        <div class="set-group-title">Man-hour rates</div>
+        <div class="set-row">
+          <div><div class="set-lbl">Default sale rate</div><div class="set-sub">DKK per hour — pre-fills new estimate rows</div></div>
+          <input class="set-in" type="number" id="def-sale-rate" min="0" step="50" placeholder="0">
+        </div>
+        <div class="set-row">
+          <div><div class="set-lbl">Default cost rate</div><div class="set-sub">DKK per hour</div></div>
+          <input class="set-in" type="number" id="def-cost-rate" min="0" step="50" placeholder="0">
+        </div>
+      </div>
+
+      <div class="set-group">
+        <div class="set-group-title">Financial targets</div>
+        <div class="set-row">
+          <div><div class="set-lbl">Target margin %</div><div class="set-sub">Green threshold in estimate — default 20%</div></div>
+          <input class="set-in" type="number" id="def-margin" min="0" max="100" step="1" placeholder="20">
+        </div>
+      </div>
+
+      <div class="set-group">
+        <div class="set-group-title">Rate card</div>
+        <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Items appear as autocomplete suggestions when typing in the Description field of the Estimate tool.</p>
+        <div id="rate-card-list"></div>
+        <button class="add-inline-btn" onclick="addRateCardRow()">+ Add item</button>
+      </div>
+
+      <div style="margin-top:20px">
+        <button class="btn primary" onclick="saveDefaults()">Save defaults</button>
+      </div>
+    </div>
+
+    <!-- JOB STAGES -->
+    <div class="stab-panel" id="panel-stages">
+      <div class="set-group">
+        <div class="set-group-title">Production pipeline stages</div>
+        <p style="font-size:12px;color:var(--text2);margin-bottom:14px">These stages appear on each job in the Job Board. Use up/down to reorder. Toggle "Date range" for stages that span multiple days.</p>
+        <div id="stage-list"></div>
+        <button class="add-inline-btn" onclick="addStage()">+ Add stage</button>
+      </div>
+      <div style="margin-top:20px">
+        <button class="btn primary" onclick="saveStages()">Save stages</button>
+      </div>
+    </div>
+
+    <!-- APPEARANCE -->
+    <div class="stab-panel" id="panel-appearance">
+      <div class="set-group">
+        <div class="set-group-title">Branding</div>
+        <div class="set-row">
+          <div><div class="set-lbl">Logo text</div><div class="set-sub">Shown in topbar and on exports</div></div>
+          <input class="set-in" type="text" id="app-logo" placeholder="THE/LAB" maxlength="30">
+        </div>
+      </div>
+
+      <div class="set-group">
+        <div class="set-group-title">Theme</div>
+        <div class="set-row">
+          <div><div class="set-lbl">Color theme</div><div class="set-sub">More themes coming soon</div></div>
+          <select class="set-in" id="app-theme" disabled>
+            <option value="dark">Dark (default)</option>
+          </select>
+        </div>
+        <div class="set-row">
+          <div><div class="set-lbl">Font</div><div class="set-sub">Interface and export font</div></div>
+          <select class="set-in" id="app-font">
+            <option value="system">System default</option>
+            <option value="inter">Inter</option>
+            <option value="mono">Monospace</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top:20px">
+        <button class="btn primary" onclick="saveAppearance()">Save appearance</button>
+      </div>
+    </div>
+
+    <!-- EXPORT -->
+    <div class="stab-panel" id="panel-export">
+      <div class="set-group">
+        <div class="set-group-title">Export defaults</div>
+        <div class="set-row">
+          <div><div class="set-lbl">Footer text</div><div class="set-sub">Shown at the bottom of all PDF/HTML exports</div></div>
+          <input class="set-in" type="text" id="exp-footer" placeholder="All prices are estimates and exclude VAT" style="min-width:260px">
+        </div>
+        <div class="set-row">
+          <div><div class="set-lbl">Cover page by default</div><div class="set-sub">Prepend a cover page when exporting</div></div>
+          <label class="toggle"><input type="checkbox" id="exp-cover"><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+
+      <div class="set-group">
+        <div class="set-group-title">Estimate export columns</div>
+        <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Choose which columns appear in the internal estimate export.</p>
+        <div id="col-toggles"></div>
+      </div>
+
+      <div style="margin-top:20px">
+        <button class="btn primary" onclick="saveExport()">Save export settings</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- EMPLOYEE MODAL -->
+<div class="modal-bg" id="emp-modal">
+  <div class="modal" style="min-width:400px">
+    <h3 id="emp-modal-title">Add employee</h3>
+    <div class="modal-group">
+      <label class="modal-lbl">Full name</label>
+      <input class="modal-in" id="emp-name" placeholder="Name...">
+    </div>
+    <div class="modal-group">
+      <label class="modal-lbl">Department</label>
+      <select class="modal-in" id="emp-dept" onchange="onEmpDeptChange()">
+        <option value="">— Select department —</option>
+      </select>
+    </div>
+    <div class="modal-group">
+      <label class="modal-lbl">Sub-department</label>
+      <select class="modal-in" id="emp-subdept">
+        <option value="">— None —</option>
+      </select>
+    </div>
+    <div class="modal-group">
+      <label class="modal-lbl">Role</label>
+      <select class="modal-in" id="emp-role">
+        <option value="employee">Employee</option>
+        <option value="teamleader">Team Leader</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn danger" id="emp-delete-btn" onclick="deleteEmployee()" style="display:none">Delete</button>
+      <button class="btn" onclick="closeModal('emp-modal')">Cancel</button>
+      <button class="btn primary" onclick="saveEmployee()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script src="/js/settings.js"></script>
+</body>
+</html>
