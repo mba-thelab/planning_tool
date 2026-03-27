@@ -193,8 +193,9 @@ function openEmpModal(empId) {
   const emp = empId ? (global.employees || []).find(e => e.id === empId) : null;
 
   document.getElementById('emp-modal-title').textContent = empId ? 'Edit employee' : 'Add employee';
-  document.getElementById('emp-name').value = emp ? emp.name : '';
-  document.getElementById('emp-role').value = emp ? (emp.role || 'employee') : 'employee';
+  document.getElementById('emp-name').value  = emp ? emp.name  : '';
+  document.getElementById('emp-email').value = emp ? (emp.email || '') : '';
+  document.getElementById('emp-role').value  = emp ? (emp.role || 'employee') : 'employee';
   document.getElementById('emp-delete-btn').style.display = empId ? '' : 'none';
 
   // Populate dept dropdown
@@ -225,8 +226,9 @@ function populateSubDeptDropdown(deptId, selectedSubId) {
 }
 
 function saveEmployee() {
-  const name = document.getElementById('emp-name').value.trim();
+  const name  = document.getElementById('emp-name').value.trim();
   if (!name) { document.getElementById('emp-name').focus(); return; }
+  const email    = document.getElementById('emp-email').value.trim().toLowerCase() || null;
   const deptId   = document.getElementById('emp-dept').value    || null;
   const subDeptId= document.getElementById('emp-subdept').value || null;
   const role     = document.getElementById('emp-role').value    || 'employee';
@@ -236,9 +238,9 @@ function saveEmployee() {
 
   if (_editingEmpId) {
     const emp = global.employees.find(e => e.id === _editingEmpId);
-    if (emp) { emp.name = name; emp.deptId = deptId; emp.subDeptId = subDeptId; emp.role = role; }
+    if (emp) { emp.name = name; emp.email = email; emp.deptId = deptId; emp.subDeptId = subDeptId; emp.role = role; }
   } else {
-    global.employees.push({id: uid(), name, deptId, subDeptId, role});
+    global.employees.push({id: uid(), name, email, deptId, subDeptId, role});
   }
 
   App.saveGlobal(global);

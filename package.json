@@ -12,6 +12,9 @@
   "type": "commonjs",
   "dependencies": {
     "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
     "puppeteer": "^24.40.0"
   }
 }

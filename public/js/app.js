@@ -72,6 +72,48 @@ function mkTask() { return {id:uid(),name:'',spec:'',crew:2,hrs:8,hold:'',note:'
 // ── APP NAMESPACE ──
 const App = {
 
+  // ── AUTH ──
+  currentUser: null,
+
+  async fetchCurrentUser() {
+    try {
+      const res = await fetch('/api/me');
+      if (!res.ok) return null;
+      this.currentUser = await res.json();
+      // Match to employee roster by email to get role
+      const global = this.getGlobal();
+      const emp = (global.employees || []).find(e => e.email === this.currentUser.email);
+      this.currentUser.role       = emp ? emp.role       : 'employee';
+      this.currentUser.employeeId = emp ? emp.id         : null;
+      this.currentUser.deptId     = emp ? emp.deptId     : null;
+      // Keep localStorage session in sync for backward compat
+      this.saveSession({ employeeId: this.currentUser.employeeId, viewMode: this.currentUser.role });
+      this._injectUserBar();
+      return this.currentUser;
+    } catch(e) { return null; }
+  },
+
+  async logout() {
+    await fetch('/api/logout', { method: 'POST' });
+    window.location.href = '/login.html';
+  },
+
+  _injectUserBar() {
+    const u = this.currentUser;
+    if (!u) return;
+    // Add name + logout to every topbar tr-right
+    const right = document.querySelector('.tr-right');
+    if (!right || document.getElementById('user-bar')) return;
+    const bar = document.createElement('div');
+    bar.id = 'user-bar';
+    bar.style.cssText = 'display:flex;align-items:center;gap:8px;margin-left:4px;padding-left:10px;border-left:1px solid var(--border)';
+    bar.innerHTML = `
+      ${u.avatar ? `<img src="${u.avatar}" style="width:22px;height:22px;border-radius:50%;object-fit:cover">` : ''}
+      <span style="font-size:11px;color:var(--text2)">${esc(u.name.split(' ')[0])}</span>
+      <button class="btn ghost" style="font-size:11px;padding:3px 8px" onclick="App.logout()">Sign out</button>`;
+    right.appendChild(bar);
+  },
+
   // ── SESSION ──
   getSession() {
     try { return Object.assign({employeeId:null, viewMode:'admin'}, JSON.parse(localStorage.getItem('thelab_session')||'{}')); }
@@ -262,3 +304,6 @@ function closeModal(id) {
   const el = document.getElementById(id);
   if (el) el.classList.remove('open');
 }
+
+// ── AUTO-INIT AUTH on every page ──
+document.addEventListener('DOMContentLoaded', () => App.fetchCurrentUser());
