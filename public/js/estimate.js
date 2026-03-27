@@ -568,11 +568,8 @@ function deleteTemplate(tid, e) {
 // ── SAVE / LOAD ──
 function saveProject() {
   readMetaFromDOM();
-  const name = projectMeta.name || 'Untitled';
-  const projects = App.getSavedProjects();
-  const existing = projects.find(p => p.name === name);
-  const key = (existing && existing._key) || 'thelab_proj_' + Date.now();
-  if (!projectMeta.key) projectMeta.key = key;
+  const key = projectMeta.key || ('thelab_proj_' + Date.now());
+  projectMeta.key = key;
   App.saveProjectData(key, projectMeta, S);
   document.getElementById('dirty-ind').style.display = 'none';
   App.clearDraft();
