@@ -13,11 +13,11 @@ const PALETTE = [
   {bg:'#791f1f',text:'#f7c1c1',label:'Red'},
 ];
 const DEFAULT_PHASES = [
-  {key:'prep', label:'Preparation', bg:'#0c447c', text:'#b5d4f4'},
-  {key:'ext',  label:'External',    bg:'#633806', text:'#fac775'},
-  {key:'d1',   label:'Day 1',       bg:'#085041', text:'#9fe1cb'},
-  {key:'d2',   label:'Day 2',       bg:'#3c3489', text:'#cecbf6'},
-  {key:'d3',   label:'Day 3',       bg:'#712b13', text:'#f5c4b3'},
+  {key:'prep',    label:'Preparation', bg:'#0c447c', text:'#b5d4f4'},
+  {key:'build',   label:'Build',       bg:'#085041', text:'#9fe1cb'},
+  {key:'paint',   label:'Paint',       bg:'#633806', text:'#fac775'},
+  {key:'install', label:'Install',     bg:'#3c3489', text:'#cecbf6'},
+  {key:'strike',  label:'Strike',      bg:'#712b13', text:'#f5c4b3'},
 ];
 const DEFAULT_JOB_STAGES = [
   {id:'build',    name:'Build',    hasDateRange:true},
@@ -337,6 +337,92 @@ const App = {
 
   // ── EXPORT CSS (shared between HTML builders) ──
   exportCSS: `*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:13px;color:#d3d1c7;background:#1a1a18;padding:40px 20px}.wrap{margin:0 auto}.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}h1{font-size:20px;font-weight:600;color:#f1efe8}.sub{font-size:12px;color:#888780;margin-bottom:22px}.logo{font-size:13px;font-weight:700;letter-spacing:2px;color:#f1efe8}.badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#3c3489;color:#cecbf6;margin-left:8px;vertical-align:middle}.grid{display:grid;gap:10px;margin-bottom:22px}.sc{background:#2c2c2a;border:1px solid #3d3d3a;border-radius:8px;padding:12px 16px}.sn{font-size:18px;font-weight:600;color:#f1efe8}.sl{font-size:11px;color:#888780;margin-top:2px}table{width:100%;border-collapse:collapse;border:1px solid #3d3d3a;border-radius:8px;overflow:hidden;background:#2c2c2a;margin-bottom:14px}thead tr{background:#1a1a18}th{font-size:11px;font-weight:600;color:#888780;text-align:left;padding:7px 12px;border-bottom:1px solid #3d3d3a;white-space:nowrap}th.r{text-align:right}td{padding:7px 12px;font-size:12px;color:#d3d1c7;border-bottom:1px solid #1a1a18;vertical-align:middle}tr:last-child td{border-bottom:none}.tr{background:#1a1a18;font-weight:600;color:#f1efe8;font-size:13px;border-top:1px solid #3d3d3a}.tr td{text-align:right}.tr td:first-child{text-align:left}.cat-row td{background:#2c2c2a;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#888780;padding:5px 12px}.footer{margin-top:22px;border-top:1px solid #2c2c2a;padding-top:12px;font-size:11px;color:#5f5e5a;display:flex;justify-content:space-between}.section-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#5f5e5a;margin:28px 0 12px;padding-bottom:7px;border-bottom:1px solid #3d3d3a}`,
+
+  // ── TEST WORKSPACE HELPERS ──
+  clearTestData() {
+    if (this.getWorkspace() !== 'test') return;
+    Object.keys(localStorage)
+      .filter(k => k.startsWith('thelab_test_'))
+      .forEach(k => localStorage.removeItem(k));
+    window.location.reload();
+  },
+
+  getSeedState() {
+    const today = new Date().toISOString().slice(0, 10);
+    const d = n => { const dt = new Date(); dt.setDate(dt.getDate() + n); return dt.toISOString().slice(0, 10); };
+    return {
+      meta: { name: 'Aesop Nordic - Flagship Fit-Out', client: 'Aesop Nordic', version: 'V1', date: today, currency: 'DKK', status: 'active' },
+      S: {
+        estimate: { sections: [
+          {id:uid(),name:'Labour',rows:[
+            {id:uid(),what:'Project manager',spec:'On-site coordination',qty:'3',unit:'days',sale:'4800',cost:'3200',note:'Incl. daily reporting'},
+            {id:uid(),what:'Installation crew',spec:'2-person team',qty:'6',unit:'days',sale:'7200',cost:'4800',note:''},
+            {id:uid(),what:'Electrician',spec:'Certified external',qty:'2',unit:'days',sale:'6500',cost:'5200',note:'Subcontractor rate'},
+            {id:uid(),what:'Finisher / painter',spec:'Touch-up and detailing',qty:'1',unit:'days',sale:'3800',cost:'2600',note:''},
+          ]},
+          {id:uid(),name:'Materials',rows:[
+            {id:uid(),what:'Steel wall framing',spec:'60x40mm powder-coated',qty:'48',unit:'lin.m',sale:'185',cost:'110',note:'RAL 9005'},
+            {id:uid(),what:'LED strip lighting',spec:'24V 14W/m warm white',qty:'32',unit:'m',sale:'320',cost:'195',note:'Incl. drivers'},
+            {id:uid(),what:'Acoustic panel',spec:'12mm felt, light grey',qty:'24',unit:'m\u00b2',sale:'680',cost:'420',note:'Custom cut'},
+            {id:uid(),what:'Joinery paint',spec:'Farrow and Ball Railings',qty:'8',unit:'l',sale:'290',cost:'175',note:'2 coats'},
+            {id:uid(),what:'Fixings and consumables',spec:'Misc hardware',qty:'1',unit:'pcs',sale:'2400',cost:'1600',note:''},
+          ]},
+          {id:uid(),name:'Technical',rows:[
+            {id:uid(),what:'Scissor lift rental',spec:'8m working height',qty:'3',unit:'days',sale:'2200',cost:'1650',note:'Incl. transport'},
+            {id:uid(),what:'Waste disposal',spec:'Skip hire + labour',qty:'1',unit:'pcs',sale:'1800',cost:'1400',note:''},
+            {id:uid(),what:'Travel and logistics',spec:'Van + fuel',qty:'6',unit:'days',sale:'650',cost:'480',note:''},
+          ]},
+        ]},
+        process: { phases: [
+          {id:uid(),key:'prep',label:'Preparation',bg:'#0c447c',text:'#b5d4f4',tasks:[
+            {id:uid(),name:'Site survey and measurements',spec:'Full floor plan verification',crew:2,hrs:4,hold:'Team A',note:'Bring laser measure'},
+            {id:uid(),name:'Material order and procurement',spec:'Steel, panels, lighting',crew:1,hrs:6,hold:'Team A',note:'8-day lead time on panels'},
+            {id:uid(),name:'Team briefing and drawings',spec:'Review install drawings',crew:4,hrs:2,hold:'Both teams',note:''},
+          ]},
+          {id:uid(),key:'build',label:'Build',bg:'#085041',text:'#9fe1cb',tasks:[
+            {id:uid(),name:'Site protection and setup',spec:'Floor covering, hoarding',crew:2,hrs:3,hold:'Team A',note:''},
+            {id:uid(),name:'Steel framing install',spec:'Wall A + B',crew:2,hrs:7,hold:'Team A',note:'Check plumb on every section'},
+            {id:uid(),name:'Acoustic panel installation',spec:'Adhesive + mechanical fix',crew:2,hrs:8,hold:'Team A',note:'Leave 2mm shadow gap'},
+          ]},
+          {id:uid(),key:'paint',label:'Paint',bg:'#633806',text:'#fac775',tasks:[
+            {id:uid(),name:'Joinery painting - first coat',spec:'Brush apply',crew:1,hrs:5,hold:'Team B',note:'Allow 4h dry time'},
+            {id:uid(),name:'Painting - second coat and touch-up',spec:'',crew:1,hrs:4,hold:'Team B',note:''},
+          ]},
+          {id:uid(),key:'install',label:'Install',bg:'#3c3489',text:'#cecbf6',tasks:[
+            {id:uid(),name:'Cable pulling',spec:'LED circuits',crew:2,hrs:5,hold:'Team B',note:'Follow electrical drawing rev.3'},
+            {id:uid(),name:'LED strip and driver fit-off',spec:'Test each zone',crew:2,hrs:6,hold:'Team B',note:''},
+            {id:uid(),name:'Final lighting commissioning',spec:'Scene programming',crew:2,hrs:3,hold:'Team A',note:'Client present for sign-off'},
+          ]},
+          {id:uid(),key:'strike',label:'Strike',bg:'#712b13',text:'#f5c4b3',tasks:[
+            {id:uid(),name:'Snagging and de-rig',spec:'Full walkthrough',crew:4,hrs:3,hold:'Both teams',note:''},
+            {id:uid(),name:'Site clean and handover',spec:'',crew:2,hrs:2,hold:'Both teams',note:'Hand keys to store manager'},
+          ]},
+        ]},
+        assignOpts: ['Team A', 'Team B', 'Both teams', 'External'],
+        jobTasks: [
+          {
+            id:uid(),name:'Aesop Nordic - Studio 3',spec:'Flagship store fit-out',crew:4,hrs:8,hold:'Team A',note:'',
+            status:'in-progress',readyByDate:d(3),readyByTime:'08:00',strikeDate:d(5),strikeTime:'17:00',
+            location:{type:'studio',studioNum:'3'},jobTypes:['build','paint'],contactName:'Ronnie',assignedTo:[],
+            stages:{build:{enabled:true,startDate:d(-2),endDate:d(2)},paint:{enabled:true,startDate:d(3),endDate:d(4)},delivery:{enabled:false},ongoing:{enabled:false},strike:{enabled:true,date:d(5)}},
+          },
+          {
+            id:uid(),name:'Nike - Studio 1',spec:'Campaign shoot setup',crew:2,hrs:6,hold:'Team B',note:'',
+            status:'upcoming',readyByDate:d(7),readyByTime:'07:00',strikeDate:d(8),strikeTime:'18:00',
+            location:{type:'studio',studioNum:'1'},jobTypes:['install'],contactName:'Maria',assignedTo:[],
+            stages:{build:{enabled:false},paint:{enabled:false},delivery:{enabled:true,date:d(6)},ongoing:{enabled:false},strike:{enabled:true,date:d(8)}},
+          },
+          {
+            id:uid(),name:'H&M Flagship - Forhallen',spec:'Seasonal display install',crew:3,hrs:7,hold:'Both teams',note:'',
+            status:'upcoming',readyByDate:d(12),readyByTime:'09:00',strikeDate:d(14),strikeTime:'16:00',
+            location:{type:'forhallen'},jobTypes:['build','install'],contactName:'Sofie',assignedTo:[],
+            stages:{build:{enabled:true,startDate:d(10),endDate:d(11)},paint:{enabled:false},delivery:{enabled:false},ongoing:{enabled:false},strike:{enabled:true,date:d(14)}},
+          },
+        ],
+        overrides: {},
+      },
+    };
+  },
 
   // ── INTERNAL HELPER ──
   _deepMerge(target, source) {

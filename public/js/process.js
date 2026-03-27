@@ -30,10 +30,12 @@ let pendingJobTask = null; // for "Add to Job Board" modal
   renderProcess();
   renderSavedList();
 
-  // Show seed button in test mode
+  // Show seed/clear buttons in test mode
   if (App.getWorkspace() === 'test') {
     const seedBtn = document.getElementById('seed-btn');
     if (seedBtn) seedBtn.style.display = '';
+    const clearBtn = document.getElementById('clear-btn');
+    if (clearBtn) clearBtn.style.display = '';
   }
 })();
 
@@ -51,46 +53,9 @@ function initBlankProject() {
 // Only called from "Seed test data" button — test mode only
 function seedTestData() {
   if (App.getWorkspace() !== 'test') return;
-  projectMeta.name   = 'Flagship Store — Fit-Out';
-  projectMeta.client = 'Aesop Nordic';
-  projectMeta.date   = new Date().toISOString().slice(0, 10);
-
-  S.assignOpts = ['Team A', 'Team B', 'Both teams', 'External'];
-  S.jobTasks   = [];
-  S.overrides  = {};
-  S.process = { phases: [
-    {id:uid(),key:'prep',label:'Preparation',bg:'#0c447c',text:'#b5d4f4',tasks:[
-      {id:uid(),name:'Site survey & measurements',spec:'Full floor plan verification',crew:2,hrs:4,hold:'Team A',note:'Bring laser measure'},
-      {id:uid(),name:'Material order & procurement',spec:'Steel, panels, lighting',crew:1,hrs:6,hold:'Team A',note:'8-day lead time on panels'},
-      {id:uid(),name:'Team briefing & drawings',spec:'Review install drawings',crew:4,hrs:2,hold:'Both teams',note:''},
-    ]},
-    {id:uid(),key:'ext',label:'External',bg:'#633806',text:'#fac775',tasks:[
-      {id:uid(),name:'Electrical first-fix',spec:'Conduit & cable runs',crew:2,hrs:8,hold:'External',note:'Sparks ApS — confirm booking'},
-      {id:uid(),name:'Panel delivery to site',spec:'Acoustic + steel',crew:1,hrs:3,hold:'External',note:'Coordinate with site manager'},
-    ]},
-    {id:uid(),key:'d1',label:'Day 1',bg:'#085041',text:'#9fe1cb',tasks:[
-      {id:uid(),name:'Site protection & setup',spec:'Floor covering, hoarding',crew:2,hrs:3,hold:'Team A',note:''},
-      {id:uid(),name:'Steel framing install',spec:'Wall A + B',crew:2,hrs:7,hold:'Team A',note:'Check plumb on every section'},
-      {id:uid(),name:'Cable pulling',spec:'LED circuits',crew:2,hrs:5,hold:'Team B',note:'Follow electrical drawing rev.3'},
-    ]},
-    {id:uid(),key:'d2',label:'Day 2',bg:'#3c3489',text:'#cecbf6',tasks:[
-      {id:uid(),name:'Acoustic panel installation',spec:'Adhesive + mechanical fix',crew:2,hrs:8,hold:'Team A',note:'Leave 2mm shadow gap'},
-      {id:uid(),name:'LED strip & driver fit-off',spec:'Test each zone',crew:2,hrs:6,hold:'Team B',note:''},
-      {id:uid(),name:'Joinery painting — first coat',spec:'Brush apply',crew:1,hrs:5,hold:'Team B',note:'Allow 4h dry time'},
-    ]},
-    {id:uid(),key:'d3',label:'Day 3',bg:'#712b13',text:'#f5c4b3',tasks:[
-      {id:uid(),name:'Painting — second coat & touch-up',spec:'',crew:1,hrs:4,hold:'Team B',note:''},
-      {id:uid(),name:'Final lighting commissioning',spec:'Scene programming',crew:2,hrs:3,hold:'Team A',note:'Client present for sign-off'},
-      {id:uid(),name:'Snagging & de-rig protection',spec:'Full walkthrough',crew:4,hrs:3,hold:'Both teams',note:''},
-      {id:uid(),name:'Site clean & handover',spec:'',crew:2,hrs:2,hold:'Both teams',note:'Hand keys to store manager'},
-    ]},
-  ]};
-  S.estimate = { sections: [
-    {id:uid(),name:'Labour',rows:[]},
-    {id:uid(),name:'Materials',rows:[]},
-    {id:uid(),name:'Technical',rows:[]},
-  ]};
-
+  const seed = App.getSeedState();
+  Object.assign(projectMeta, seed.meta);
+  Object.assign(S, seed.S);
   App.clearDraft();
   applyMetaToDOM();
   renderAssignOpts();

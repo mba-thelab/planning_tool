@@ -55,10 +55,12 @@ let pendingPush = null;
   App.fetchRates(document.getElementById('cur-status')).then(() => onCurChange());
   document.getElementById('cover-toggle').checked = coverPageEnabled;
 
-  // Show seed button in test mode
+  // Show seed/clear buttons in test mode
   if (App.getWorkspace() === 'test') {
     const seedBtn = document.getElementById('seed-btn');
     if (seedBtn) seedBtn.style.display = '';
+    const clearBtn = document.getElementById('clear-btn');
+    if (clearBtn) clearBtn.style.display = '';
   }
 })();
 
@@ -87,35 +89,9 @@ function initBlankEstimate(settings) {
 // Only callable in test mode — seeds realistic sample data
 function seedTestData() {
   if (App.getWorkspace() !== 'test') return;
-  projectMeta.name   = 'Flagship Store — Fit-Out';
-  projectMeta.client = 'Aesop Nordic';
-  projectMeta.date   = new Date().toISOString().slice(0, 10);
-  S = {
-    estimate: { sections: [
-      {id:uid(),name:'Labour',rows:[
-        {id:uid(),what:'Project manager',spec:'On-site coordination',qty:'3',unit:'days',sale:'4800',cost:'3200',note:'Incl. daily reporting'},
-        {id:uid(),what:'Installation crew',spec:'2-person team',qty:'6',unit:'days',sale:'7200',cost:'4800',note:''},
-        {id:uid(),what:'Electrician',spec:'Certified external',qty:'2',unit:'days',sale:'6500',cost:'5200',note:'Subcontractor rate'},
-        {id:uid(),what:'Finisher / painter',spec:'Touch-up & detailing',qty:'1',unit:'days',sale:'3800',cost:'2600',note:''},
-      ]},
-      {id:uid(),name:'Materials',rows:[
-        {id:uid(),what:'Steel wall framing',spec:'60x40mm powder-coated',qty:'48',unit:'lin.m',sale:'185',cost:'110',note:'RAL 9005'},
-        {id:uid(),what:'LED strip lighting',spec:'24V 14W/m warm white',qty:'32',unit:'m',sale:'320',cost:'195',note:'Incl. drivers'},
-        {id:uid(),what:'Acoustic panel',spec:'12mm felt, light grey',qty:'24',unit:'m²',sale:'680',cost:'420',note:'Custom cut'},
-        {id:uid(),what:'Joinery paint',spec:'Farrow & Ball Railings',qty:'8',unit:'l',sale:'290',cost:'175',note:'2 coats'},
-        {id:uid(),what:'Fixings & consumables',spec:'Misc hardware',qty:'1',unit:'pcs',sale:'2400',cost:'1600',note:''},
-      ]},
-      {id:uid(),name:'Technical',rows:[
-        {id:uid(),what:'Scissor lift rental',spec:'8m working height',qty:'3',unit:'days',sale:'2200',cost:'1650',note:'Incl. transport'},
-        {id:uid(),what:'Waste disposal',spec:'Skip hire + labour',qty:'1',unit:'pcs',sale:'1800',cost:'1400',note:''},
-        {id:uid(),what:'Travel & logistics',spec:'Van + fuel',qty:'6',unit:'days',sale:'650',cost:'480',note:''},
-      ]},
-    ]},
-    process: { phases: DEFAULT_PHASES.map(p => ({id:uid(),key:p.key,label:p.label,bg:p.bg,text:p.text,tasks:[]})) },
-    assignOpts: ['Team A', 'Team B', 'Both teams', 'External'],
-    jobTasks: [],
-    overrides: {},
-  };
+  const seed = App.getSeedState();
+  Object.assign(projectMeta, seed.meta);
+  S = seed.S;
   App.clearDraft();
   applyMetaToDOM();
   renderAssignOpts();

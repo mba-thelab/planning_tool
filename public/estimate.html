@@ -20,6 +20,7 @@
   <div class="tr-right">
     <span class="dirty" id="dirty-ind" style="display:none">● Unsaved</span>
     <button class="btn ghost" id="seed-btn" style="display:none;font-size:11px;color:var(--teal)" onclick="seedTestData()" title="Fill with sample data (test mode only)">⚗ Seed data</button>
+    <button class="btn ghost" id="clear-btn" style="display:none;font-size:11px;color:#f09595" onclick="if(confirm('Clear all test data?'))App.clearTestData()" title="Remove all test data (test mode only)">✕ Clear all</button>
     <button class="btn ghost" onclick="document.getElementById('imp-file').click()">↑ Import</button>
     <input type="file" id="imp-file" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleImport(event)">
     <div style="position:relative">
