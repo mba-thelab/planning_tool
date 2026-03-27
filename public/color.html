@@ -28,6 +28,8 @@
 .cc-copy.copied{color:#9fe1cb;border-color:#9fe1cb}
 .cc-error{font-size:12px;color:#f09595;min-height:16px;margin-bottom:4px}
 .cc-disclaimer{font-size:11px;color:var(--text3);margin-top:20px;padding-top:16px;border-top:1px solid var(--bg3)}
+.cc-mode-btn{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);background:none;color:var(--text3);cursor:pointer;transition:all .15s}
+.cc-mode-btn.active{background:var(--bg3);border-color:var(--text2);color:var(--hi)}
 .cc-formats{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .cc-fmt{font-size:10px;padding:2px 8px;border-radius:4px;background:var(--bg3);color:var(--text3);font-family:monospace}
 @media(max-width:500px){.cc-results{grid-template-columns:1fr}}
@@ -58,7 +60,17 @@
     <span class="cc-fmt">2728 C (Pantone)</span>
   </div>
 
-  <input class="cc-input" id="cc-input" placeholder="Paste HEX, RGB, CMYK or Pantone…" oninput="onInput()" autocomplete="off" spellcheck="false">
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+    <span style="font-size:11px;color:var(--text3)">Output:</span>
+    <button class="cc-mode-btn active" data-mode="both" onclick="setMode('both')">RAL + NCS</button>
+    <button class="cc-mode-btn" data-mode="ral" onclick="setMode('ral')">RAL only</button>
+    <button class="cc-mode-btn" data-mode="ncs" onclick="setMode('ncs')">NCS only</button>
+  </div>
+
+  <div style="display:flex;gap:8px">
+    <input class="cc-input" id="cc-input" placeholder="Paste HEX, RGB, CMYK or Pantone…" oninput="onInput()" onkeydown="if(event.key==='Enter')onInput()" autocomplete="off" spellcheck="false" style="flex:1">
+    <button class="btn primary" onclick="onInput()" style="white-space:nowrap">Convert →</button>
+  </div>
   <div class="cc-error" id="cc-error"></div>
 
   <div class="cc-swatch" id="cc-swatch" style="background:var(--bg3)">
@@ -67,7 +79,7 @@
   <div class="cc-rgb" id="cc-rgb"></div>
 
   <div class="cc-results" id="cc-results" style="display:none">
-    <div class="cc-card">
+    <div class="cc-card" id="ral-card">
       <div class="cc-card-title">Nearest RAL Classic</div>
       <div class="cc-match">
         <div class="cc-match-swatch" id="ral-swatch"></div>
@@ -79,7 +91,7 @@
         </div>
       </div>
     </div>
-    <div class="cc-card">
+    <div class="cc-card" id="ncs-card">
       <div class="cc-card-title">Nearest NCS</div>
       <div class="cc-match">
         <div class="cc-match-swatch" id="ncs-swatch"></div>
@@ -254,7 +266,7 @@ const PANTONE_DB = {
   '314 C':[0,135,168],'315 C':[0,109,136],'316 C':[0,82,100],
   '317 C':[174,225,225],'318 C':[106,208,214],'319 C':[0,189,196],'320 C':[0,155,166],
   '321 C':[0,134,135],'322 C':[0,111,112],'323 C':[0,136,130],
-  '324 C':[152,214,209],'325 C':[88,196,190],'326 C',[0,177,169],'327 C':[0,131,122],
+  '324 C':[152,214,209],'325 C':[88,196,190],'326 C':[0,177,169],'327 C':[0,131,122],
   '328 C':[0,109,103],'329 C':[0,87,81],'330 C':[0,64,59],
   '331 C':[160,220,210],'332 C':[126,207,198],'333 C':[0,186,174],'334 C':[0,140,130],
   '335 C':[0,112,101],'336 C':[0,85,74],'337 C':[138,204,188],
@@ -479,6 +491,13 @@ function rgbToHex(r,g,b) {
 
 function luminance(r,g,b) { return 0.299*r+0.587*g+0.114*b; }
 
+let _mode = 'both';
+function setMode(m) {
+  _mode = m;
+  document.querySelectorAll('.cc-mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+  onInput();
+}
+
 function onInput() {
   const val = document.getElementById('cc-input').value;
   const rgb = parseInput(val);
@@ -516,31 +535,36 @@ function onInput() {
   labelEl.textContent = hex;
   rgbEl.textContent = `rgb(${r}, ${g}, ${b})`;
 
+  const ralCard = document.getElementById('ral-card');
+  const ncsCard = document.getElementById('ncs-card');
+  ralCard.style.display = (_mode === 'ral' || _mode === 'both') ? '' : 'none';
+  ncsCard.style.display = (_mode === 'ncs' || _mode === 'both') ? '' : 'none';
+
   // Find nearest RAL
-  const ral = findNearest(rgb, RAL_DB);
-  const [ralClass, ralLabel] = deLabel(ral.de);
-  const ralHex = rgbToHex(...ral.rgb);
-  document.getElementById('ral-swatch').style.background = ralHex;
-  document.getElementById('ral-code').textContent = ral.code;
-  document.getElementById('ral-name').textContent = ral.name;
-  document.getElementById('ral-de').innerHTML =
-    `<span class="cc-de-badge cc-de-${ralClass}">${ralLabel}</span> <span style="color:var(--text3);font-size:10px">ΔE ${ral.de.toFixed(1)}</span>`;
+  if (_mode !== 'ncs') {
+    const ral = findNearest(rgb, RAL_DB);
+    const [ralClass, ralLabel] = deLabel(ral.de);
+    document.getElementById('ral-swatch').style.background = rgbToHex(...ral.rgb);
+    document.getElementById('ral-code').textContent = ral.code;
+    document.getElementById('ral-name').textContent = ral.name;
+    document.getElementById('ral-de').innerHTML =
+      `<span class="cc-de-badge cc-de-${ralClass}">${ralLabel}</span> <span style="color:var(--text3);font-size:10px">ΔE ${ral.de.toFixed(1)}</span>`;
+    document.getElementById('ral-copy').textContent = 'Copy code';
+    document.getElementById('ral-copy').classList.remove('copied');
+  }
 
   // Find nearest NCS
-  const ncs = findNearest(rgb, NCS_DB);
-  const [ncsClass, ncsLabel] = deLabel(ncs.de);
-  const ncsHex = rgbToHex(...ncs.rgb);
-  document.getElementById('ncs-swatch').style.background = ncsHex;
-  document.getElementById('ncs-code').textContent = ncs.code;
-  document.getElementById('ncs-name').textContent = '≈ approx.';
-  document.getElementById('ncs-de').innerHTML =
-    `<span class="cc-de-badge cc-de-${ncsClass}">${ncsLabel}</span> <span style="color:var(--text3);font-size:10px">ΔE ${ncs.de.toFixed(1)}</span>`;
-
-  // Reset copy buttons
-  document.getElementById('ral-copy').textContent = 'Copy code';
-  document.getElementById('ral-copy').classList.remove('copied');
-  document.getElementById('ncs-copy').textContent = 'Copy code';
-  document.getElementById('ncs-copy').classList.remove('copied');
+  if (_mode !== 'ral') {
+    const ncs = findNearest(rgb, NCS_DB);
+    const [ncsClass, ncsLabel] = deLabel(ncs.de);
+    document.getElementById('ncs-swatch').style.background = rgbToHex(...ncs.rgb);
+    document.getElementById('ncs-code').textContent = ncs.code;
+    document.getElementById('ncs-name').textContent = '≈ approx.';
+    document.getElementById('ncs-de').innerHTML =
+      `<span class="cc-de-badge cc-de-${ncsClass}">${ncsLabel}</span> <span style="color:var(--text3);font-size:10px">ΔE ${ncs.de.toFixed(1)}</span>`;
+    document.getElementById('ncs-copy').textContent = 'Copy code';
+    document.getElementById('ncs-copy').classList.remove('copied');
+  }
 
   resultsEl.style.display = 'grid';
 }
