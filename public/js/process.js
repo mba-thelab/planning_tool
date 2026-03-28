@@ -14,12 +14,20 @@ let pendingJobTask = null; // for "Add to Job Board" modal
   if (draft && draft.S) {
     Object.assign(S, draft.S);
     Object.assign(projectMeta, draft.meta || {});
+    if (!S.process || !Array.isArray(S.process.phases)) S.process = { phases: DEFAULT_PHASES.map(p => ({id:uid(), key:p.key, label:p.label, bg:p.bg, text:p.text, tasks:[]})) };
+    if (!S.estimate || !Array.isArray(S.estimate.sections)) S.estimate = { sections: [{id:uid(),name:'Labour',rows:[]},{id:uid(),name:'Materials',rows:[]},{id:uid(),name:'Technical',rows:[]}] };
+    if (!Array.isArray(S.assignOpts)) S.assignOpts = [];
+    if (!Array.isArray(S.jobTasks)) S.jobTasks = [];
   } else {
     // No draft — check autosave, else blank state
     const autosave = (() => { try { return JSON.parse(localStorage.getItem(App._pfx('thelab_autosave')) || 'null'); } catch(e) { return null; } })();
     if (autosave && autosave.S) {
       Object.assign(S, autosave.S);
       Object.assign(projectMeta, {name:autosave.name||'',client:autosave.client||'',version:autosave.version||'V1',date:autosave.date||'',currency:autosave.currency||'DKK'});
+      if (!S.process || !Array.isArray(S.process.phases)) S.process = { phases: DEFAULT_PHASES.map(p => ({id:uid(), key:p.key, label:p.label, bg:p.bg, text:p.text, tasks:[]})) };
+      if (!S.estimate || !Array.isArray(S.estimate.sections)) S.estimate = { sections: [{id:uid(),name:'Labour',rows:[]},{id:uid(),name:'Materials',rows:[]},{id:uid(),name:'Technical',rows:[]}] };
+      if (!Array.isArray(S.assignOpts)) S.assignOpts = [];
+      if (!Array.isArray(S.jobTasks)) S.jobTasks = [];
     } else {
       initBlankProject();
     }
@@ -140,7 +148,10 @@ function getPhase(pid)      { return S.process.phases.find(p => p.id === pid); }
 function getPTask(pid, tid)  { return getPhase(pid).tasks.find(t => t.id === tid); }
 
 function renderProcess() {
+  if (!S.process || !Array.isArray(S.process.phases)) S.process = { phases: DEFAULT_PHASES.map(p => ({id:uid(), key:p.key, label:p.label, bg:p.bg, text:p.text, tasks:[]})) };
+  if (!Array.isArray(S.jobTasks)) S.jobTasks = [];
   const area = document.getElementById('main');
+  if (!area) return;
   area.innerHTML = '';
 
   const sumDiv = document.createElement('div'); sumDiv.className = 'proc-sum';

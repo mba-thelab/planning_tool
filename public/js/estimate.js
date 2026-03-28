@@ -22,6 +22,10 @@ let pendingPush = null;
   if (draft && draft.S) {
     Object.assign(S, draft.S);
     Object.assign(projectMeta, draft.meta || {});
+    if (!S.estimate || !Array.isArray(S.estimate.sections)) S.estimate = { sections: [] };
+    if (!S.process || !Array.isArray(S.process.phases)) S.process = { phases: [] };
+    if (!Array.isArray(S.assignOpts)) S.assignOpts = [];
+    if (!Array.isArray(S.jobTasks)) S.jobTasks = [];
     applyMetaToDOM();
   } else {
     const autosave = (() => { try { return JSON.parse(localStorage.getItem(App._pfx('thelab_autosave')) || 'null'); } catch(e) { return null; } })();
@@ -34,6 +38,10 @@ let pendingPush = null;
         date: autosave.date || '',
         currency: autosave.currency || 'DKK',
       });
+      if (!S.estimate || !Array.isArray(S.estimate.sections)) S.estimate = { sections: [] };
+      if (!S.process || !Array.isArray(S.process.phases)) S.process = { phases: [] };
+      if (!Array.isArray(S.assignOpts)) S.assignOpts = [];
+      if (!Array.isArray(S.jobTasks)) S.jobTasks = [];
       applyMetaToDOM();
     } else {
       initBlankEstimate(settings);
@@ -191,8 +199,11 @@ function getERow(sid, rid) { return getSection(sid).rows.find(r => r.id === rid)
 function recalcDebounced() { clearTimeout(_recalcTimer); _recalcTimer = setTimeout(recalc, 150); }
 
 function renderEstimate() {
+  if (!S.estimate || !Array.isArray(S.estimate.sections)) S.estimate = { sections: [] };
+  if (!Array.isArray(S.jobTasks)) S.jobTasks = [];
   const cur = getCur(), showFX = cur !== 'DKK';
   const area = document.getElementById('main');
+  if (!area) return;
   area.innerHTML = '';
   S.estimate.sections.forEach(sec => {
     const wrap = document.createElement('div');
