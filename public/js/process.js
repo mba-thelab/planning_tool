@@ -69,7 +69,15 @@ function applyMetaToDOM() {
   document.getElementById('proj-client').value = projectMeta.client  || '';
   document.getElementById('sel-ver').value     = projectMeta.version || 'V1';
   document.getElementById('proj-date').value   = projectMeta.date    || '';
+  updateProjContext();
 }
+
+window.updateProjContext = function() {
+  const name = document.getElementById('proj-name').value.trim();
+  const ver  = document.getElementById('sel-ver').value || 'V1';
+  const ctx  = document.getElementById('proj-context');
+  if (ctx) ctx.textContent = name ? (name.toUpperCase() + ' / ' + ver) : '—';
+};
 function readMetaFromDOM() {
   projectMeta.name    = document.getElementById('proj-name').value;
   projectMeta.client  = document.getElementById('proj-client').value;
@@ -82,6 +90,9 @@ function switchToEstimate() {
   saveDraftState();
   window.location.href = '/estimate.html';
 }
+
+// Save draft on any sys-nav navigation
+window.addEventListener('pagehide', saveDraftState);
 function saveDraftState() {
   readMetaFromDOM();
   App.saveDraft(projectMeta, S);
@@ -147,16 +158,16 @@ function renderProcess() {
     const phaseMH = phase.tasks.reduce((s,t) => s + (parseFloat(t.crew)||0)*(parseFloat(t.hrs)||0), 0);
     const wrap = document.createElement('div'); wrap.className = 'section-block';
     wrap.innerHTML = `
-      <div class="section-hdr" style="position:relative">
+      <div class="phase-hdr">
         <div style="position:relative;display:inline-block">
-          <span class="phase-pill" id="pp-${phase.id}" style="background:${phase.bg};color:${phase.text}"
-            onclick="toggleColorPicker('${phase.id}')" title="Click to change colour">${esc(phase.label)}</span>
+          <div class="phase-accent-bar" id="pp-${phase.id}" style="background:${phase.bg};cursor:pointer"
+            onclick="toggleColorPicker('${phase.id}')" title="Click to change colour"></div>
           <div class="color-palette" id="cp-${phase.id}">
             ${PALETTE.map(c=>`<div class="cp-swatch" style="background:${c.bg}" title="${c.label}" onclick="setPhaseColor('${phase.id}','${c.bg}','${c.text}')"></div>`).join('')}
           </div>
         </div>
-        <input class="section-name" value="${esc(phase.label)}"
-          oninput="getPhase('${phase.id}').label=this.value;document.getElementById('pp-${phase.id}').textContent=this.value;dirty()">
+        <input class="phase-hdr-name" style="background:none;border:none;outline:none;padding:0;min-width:60px;width:auto" value="${esc(phase.label)}"
+          oninput="getPhase('${phase.id}').label=this.value;dirty()">
         <span id="phase-mh-${phase.id}" style="font-size:11px;color:var(--text2);margin-left:4px">${phaseMH?phaseMH+' mh':''}</span>
         <button class="del-section-btn" style="margin-left:auto" onclick="delPhase('${phase.id}')">✕</button>
       </div>
@@ -363,8 +374,8 @@ function toggleColorPicker(pid) {
 }
 function setPhaseColor(pid, bg, text) {
   const phase = getPhase(pid); phase.bg = bg; phase.text = text;
-  const pill = document.getElementById('pp-' + pid);
-  if (pill) { pill.style.background = bg; pill.style.color = text; }
+  const bar = document.getElementById('pp-' + pid);
+  if (bar) bar.style.background = bg;
   document.getElementById('cp-' + pid)?.classList.remove('open');
   dirty();
 }
@@ -452,7 +463,7 @@ function openJobBoardModal(pid, tid) {
       dateFields = `<label><span style="font-size:10px;color:var(--text3)">Date</span><input type="date" id="jb-${stage.id}-date" value="${stageData.date||''}" class="modal-in" style="width:130px"></label>`;
     }
     return `<div class="stage-row">
-      <input type="checkbox" id="jb-stage-${stage.id}" ${checked} style="accent-color:var(--teal);width:14px;height:14px;flex-shrink:0">
+      <input type="checkbox" id="jb-stage-${stage.id}" ${checked} style="accent-color:var(--accent);width:14px;height:14px;flex-shrink:0">
       <span class="stage-name">${esc(stage.name)}</span>
       <div class="stage-dates">${dateFields}</div>
     </div>`;

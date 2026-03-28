@@ -9,7 +9,7 @@
 .jb-toolbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .jb-filter-group{display:flex;gap:4px;align-items:center}
 .jb-filter-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-right:2px}
-.jb-chip{padding:4px 10px;font-size:11px;font-weight:500;border-radius:20px;cursor:pointer;border:1px solid var(--border);background:var(--bg);color:var(--text2);white-space:nowrap}
+.jb-chip{padding:4px 10px;font-size:10px;font-weight:400;letter-spacing:.06em;font-family:'TheLabMono',monospace;border-radius:4px;cursor:pointer;border:1px solid var(--border);background:var(--bg);color:var(--text2);white-space:nowrap}
 .jb-chip:hover{color:var(--hi);border-color:var(--text2)}
 .jb-chip.active{background:var(--bg3);color:var(--hi);border-color:var(--text2)}
 .jb-select{background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--text);outline:none;cursor:pointer}
@@ -20,7 +20,7 @@
 .vt-btn:hover{color:var(--hi)}
 .vt-btn.active{background:var(--bg2);color:var(--hi)}
 
-.jb-main{padding:20px 24px;overflow-y:auto;height:calc(100vh - 52px - 50px)}
+.jb-main{padding:20px 24px;overflow-y:auto;height:calc(100vh - 86px - 50px)}
 .jb-empty{text-align:center;padding:60px 20px;color:var(--text3);font-size:13px}
 .jb-empty-title{font-size:16px;font-weight:600;color:var(--text2);margin-bottom:8px}
 
@@ -32,7 +32,7 @@
 .proj-group-count{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--bg3);color:var(--text2)}
 
 /* TASK CARD */
-.task-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:8px}
+.task-card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:12px 14px;margin-bottom:8px}
 .task-card:hover{border-color:var(--text3)}
 .task-card-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
 .task-card-info{flex:1;min-width:0}
@@ -41,7 +41,7 @@
 .task-card-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .status-badge{font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;cursor:pointer;border:none;white-space:nowrap;letter-spacing:.03em}
 .status-badge.upcoming{background:var(--bg3);color:var(--text2)}
-.status-badge.in-progress{background:#2a1e06;color:#fac775;border:1px solid #633806}
+.status-badge.in-progress{background:rgba(224,61,0,.15);color:var(--accent);border:1px solid rgba(224,61,0,.3)}
 .status-badge.done{background:#082010;color:#9fe1cb;border:1px solid #085041}
 .crew-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
 .crew-tag{display:inline-flex;align-items:center;gap:4px;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-size:11px;color:var(--text2)}
@@ -60,7 +60,7 @@
 
 /* TASK VIEW */
 .task-list-hdr{display:grid;grid-template-columns:1fr 140px 160px 120px 80px;gap:8px;padding:6px 12px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);border-bottom:1px solid var(--border);margin-bottom:4px}
-.task-list-row{display:grid;grid-template-columns:1fr 140px 160px 120px 80px;gap:8px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;margin-bottom:4px;align-items:center;font-size:12px}
+.task-list-row{display:grid;grid-template-columns:1fr 140px 160px 120px 80px;gap:8px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;margin-bottom:4px;align-items:center;font-size:12px}
 .task-list-row:hover{border-color:var(--text3)}
 </style>
 </head>
@@ -76,6 +76,16 @@
     <a href="/" class="btn ghost">← Dashboard</a>
   </div>
 </div>
+
+<nav class="sys-nav">
+  <a href="/" class="sys-nav-item" id="snav-dash">DASHBOARD</a>
+  <span class="sys-nav-sep">/</span>
+  <a href="/process.html" class="sys-nav-item" id="snav-process">PROCESS</a>
+  <span class="sys-nav-sep">/</span>
+  <a href="/estimate.html" class="sys-nav-item" id="snav-estimate">ESTIMATE</a>
+  <span class="sys-nav-sep">/</span>
+  <a href="/jobs.html" class="sys-nav-item active" id="snav-jobs">JOB BOARD</a>
+</nav>
 
 <!-- FILTER TOOLBAR -->
 <div class="jb-toolbar">

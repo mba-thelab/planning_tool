@@ -70,7 +70,15 @@ function applyMetaToDOM() {
   document.getElementById('sel-ver').value      = projectMeta.version || 'V1';
   document.getElementById('proj-date').value    = projectMeta.date    || '';
   document.getElementById('sel-cur').value      = projectMeta.currency || 'DKK';
+  updateProjContext();
 }
+
+window.updateProjContext = function() {
+  const name = document.getElementById('proj-name').value.trim();
+  const ver  = document.getElementById('sel-ver').value || 'V1';
+  const ctx  = document.getElementById('proj-context');
+  if (ctx) ctx.textContent = name ? (name.toUpperCase() + ' / ' + ver) : '—';
+};
 
 function initBlankEstimate(settings) {
   projectMeta.name   = '';
@@ -105,6 +113,9 @@ function switchToProcess() {
   saveDraftState();
   window.location.href = '/process.html';
 }
+
+// Save draft on any sys-nav navigation
+window.addEventListener('pagehide', saveDraftState);
 
 function saveDraftState() {
   readMetaFromDOM();

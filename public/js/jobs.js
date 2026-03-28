@@ -160,7 +160,7 @@ function render() {
   if (!_allTasks.length) {
     mainEl.innerHTML = `<div class="jb-empty">
       <div class="jb-empty-title">No jobs on the board yet</div>
-      <p>Open the <a href="/process.html" style="color:var(--teal)">Process planner</a>, add tasks, and use the "+ Job Board" button to add them here.</p>
+      <p>Open the <a href="/process.html" style="color:var(--accent)">Process planner</a>, add tasks, and use the "+ Job Board" button to add them here.</p>
     </div>`;
     return;
   }
@@ -490,7 +490,7 @@ function _buildJbEditStages(existing) {
         <input type="date" id="jbe-${stage.id}-date" value="${sd.date||''}" class="modal-in" style="width:130px"></label>`;
     }
     return `<div class="stage-row">
-      <input type="checkbox" id="jbe-stage-${stage.id}" ${checked} style="accent-color:var(--teal);width:14px;height:14px;flex-shrink:0">
+      <input type="checkbox" id="jbe-stage-${stage.id}" ${checked} style="accent-color:var(--accent);width:14px;height:14px;flex-shrink:0">
       <span class="stage-name">${esc(stage.name)}</span>
       <div class="stage-dates">${dates}</div>
     </div>`;

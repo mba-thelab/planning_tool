@@ -359,7 +359,7 @@ function renderStagesTab() {
       </div>
       <div style="display:flex;align-items:center;gap:12px">
         <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer">
-          <input type="checkbox" ${stage.hasDateRange?'checked':''} style="accent-color:var(--teal)"
+          <input type="checkbox" ${stage.hasDateRange?'checked':''} style="accent-color:var(--accent)"
             onchange="updateStageField('${stage.id}','hasDateRange',this.checked)">
           Date range
         </label>

@@ -9,16 +9,10 @@
 <div class="topbar">
   <a class="logo" href="/">THE/LAB</a>
   <div class="sep"></div>
-  <input class="ti proj" id="proj-name" placeholder="Project name..." oninput="dirty()">
-  <div class="sep"></div>
-  <input class="ti client" id="proj-client" placeholder="Client..." oninput="dirty()">
-  <div class="tabs">
-    <div class="tab" onclick="switchToEstimate()">Estimate</div>
-    <div class="tab active">Process</div>
-  </div>
+  <span class="proj-context" id="proj-context" onclick="document.getElementById('proj-name').focus()">—</span>
   <div class="tr-right">
     <span class="dirty" id="dirty-ind" style="display:none">● Unsaved</span>
-    <button class="btn ghost" id="seed-btn" style="display:none;font-size:11px;color:var(--teal)" onclick="seedTestData()" title="Fill with sample data (test mode only)">⚗ Seed data</button>
+    <button class="btn ghost" id="seed-btn" style="display:none;font-size:11px;color:var(--accent)" onclick="seedTestData()" title="Fill with sample data (test mode only)">⚗ Seed data</button>
     <button class="btn ghost" id="clear-btn" style="display:none;font-size:11px;color:#f09595" onclick="if(confirm('Clear all test data?'))App.clearTestData()" title="Remove all test data (test mode only)">✕ Clear all</button>
     <div style="position:relative">
       <button class="btn" onclick="toggleExportMenu()">Export ▾</button>
@@ -31,10 +25,22 @@
   </div>
 </div>
 
+<nav class="sys-nav">
+  <a href="/" class="sys-nav-item" id="snav-dash">DASHBOARD</a>
+  <span class="sys-nav-sep">/</span>
+  <a href="/process.html" class="sys-nav-item active" id="snav-process">PROCESS</a>
+  <span class="sys-nav-sep">/</span>
+  <a href="/estimate.html" class="sys-nav-item" id="snav-estimate">ESTIMATE</a>
+  <span class="sys-nav-sep">/</span>
+  <a href="/jobs.html" class="sys-nav-item" id="snav-jobs">JOB BOARD</a>
+</nav>
+
 <div class="app">
   <div class="sidebar">
     <div>
       <div class="sb-lbl">Project</div>
+      <input class="sb-in" id="proj-name" placeholder="Project name..." oninput="dirty();updateProjContext()" style="margin-bottom:5px">
+      <input class="sb-in" id="proj-client" placeholder="Client..." oninput="dirty()" style="margin-bottom:5px">
       <div class="sb-row">
         <select class="sb-in" id="sel-ver" onchange="dirty()">
           <option>V1</option><option>V2</option><option>V3</option><option>V4</option><option>V5</option>
