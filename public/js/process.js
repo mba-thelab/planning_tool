@@ -28,7 +28,6 @@ let pendingJobTask = null; // for "Add to Job Board" modal
   applyMetaToDOM();
   renderAssignOpts();
   renderProcess();
-  renderSavedList();
 
   // Show seed/clear buttons in test mode
   if (App.getWorkspace() === 'test') {
@@ -60,7 +59,6 @@ function seedTestData() {
   applyMetaToDOM();
   renderAssignOpts();
   renderProcess();
-  renderSavedList();
   document.getElementById('dirty-ind').style.display = 'inline';
 }
 
@@ -364,6 +362,14 @@ function calcProcess() {
   const d=document.getElementById('ps-days'); if(d) d.textContent=onSiteDays;
   const m=document.getElementById('ps-mh');   if(m) m.textContent=totalMH;
   const t=document.getElementById('ps-tasks'); if(t) t.textContent=totalTasks;
+
+  // Sidebar summary
+  const manDays = totalMH > 0 ? (totalMH / 8).toFixed(1).replace(/\.0$/,'') : '—';
+  const el_md = document.getElementById('s-mandays'); if(el_md) el_md.textContent = totalMH ? manDays : '—';
+  const el_mh = document.getElementById('s-manhours'); if(el_mh) el_mh.textContent = totalMH || '—';
+  const el_ph = document.getElementById('s-phases'); if(el_ph) el_ph.textContent = S.process.phases.length || '—';
+  const onBoard = (S.jobTasks || []).length;
+  const el_ob = document.getElementById('s-onboard'); if(el_ob) el_ob.textContent = onBoard || '—';
 }
 
 // ── COLOR PICKER ──
@@ -678,20 +684,8 @@ function saveProject() {
   App.saveProjectData(key, projectMeta, S);
   document.getElementById('dirty-ind').style.display = 'none';
   App.clearDraft();
-  renderSavedList();
 }
-function renderSavedList() {
-  const el = document.getElementById('saved-list');
-  const projects = App.getSavedProjects();
-  if (!projects.length) { el.innerHTML = '<div style="font-size:11px;color:var(--text3);padding:3px">No saved projects</div>'; return; }
-  el.innerHTML = projects.map(p => {
-    return `<div class="sv-item" onclick="loadProject('${p._key}')">
-      <div class="sv-name">${esc(p.name||'Untitled')}${p.client?` <span style="color:var(--text3)">/ ${esc(p.client)}</span>`:''}</div>
-      <span class="sv-dup" onclick="dupSaved('${p._key}',event)">⧉</span>
-      <span class="sv-del" onclick="delSaved('${p._key}',event)">✕</span>
-    </div>`;
-  }).join('');
-}
+function renderSavedList() { /* saved list lives on Dashboard */ }
 function loadProject(key) {
   const d = App.loadProjectByKey(key); if (!d) { alert('Could not load project'); return; }
   Object.assign(S, d.S);

@@ -31,6 +31,17 @@ function refresh() {
   render();
 }
 
+window.openProjectFromBoard = function(projectKey) {
+  const proj = App.loadProjectByKey(projectKey);
+  if (!proj) return;
+  App.saveDraft({
+    key: projectKey, name: proj.name||'', client: proj.client||'',
+    version: proj.version||'V1', date: proj.date||'',
+    currency: proj.currency||'DKK', status: proj.status||'active',
+  }, proj.S);
+  window.location.href = '/process.html';
+};
+
 // ── GATHER TASKS ──
 function loadAllTasks() {
   _allTasks = [];
@@ -313,6 +324,7 @@ function taskCard(task, projectKey, stages, showProject) {
   const editBtn = App.canAccess('process')
     ? `<button class="btn ghost" style="font-size:10px;padding:2px 8px" onclick="openJbEdit('${projectKey}','${task.id}')">Edit</button>`
     : '';
+  const projBtn = `<button class="btn ghost" style="font-size:10px;padding:2px 8px" onclick="openProjectFromBoard('${projectKey}')" title="Open project in Process">↗ Project</button>`;
 
   return `<div class="task-card">
     <div class="task-card-top">
@@ -322,6 +334,7 @@ function taskCard(task, projectKey, stages, showProject) {
         ${mhText ? `<div style="font-size:11px;color:var(--text3);margin-top:3px">${mhText}</div>` : ''}
       </div>
       <div class="task-card-right">
+        ${projBtn}
         ${editBtn}
         <button class="status-badge ${statusClass}" onclick="cycleStatus('${projectKey}','${task.id}')">${statusLabel}</button>
       </div>
