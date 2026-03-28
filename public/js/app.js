@@ -439,6 +439,68 @@ const App = {
   },
 };
 
+// ── DATE HELPER ──
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+}
+function fmtDateRange(start, end) {
+  if (!start && !end) return '—';
+  if (!end) return fmtDate(start);
+  return fmtDate(start) + ' – ' + fmtDate(end);
+}
+
+// ── JOB STORAGE ──
+const Jobs = {
+  _pfx() { return App._pfx('thelab_job_'); },
+
+  newId() { return this._pfx() + Date.now(); },
+
+  blank() {
+    return {
+      id: this.newId(),
+      status: 'inquiry',
+      title: '',
+      client: { name: '', contact: '', email: '' },
+      departments: [],
+      dateStart: '',
+      dateEnd: '',
+      currency: 'DKK',
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      plan: {
+        phases: DEFAULT_PHASES.map(p => ({
+          id: uid(), key: p.key, label: p.label, bg: p.bg, text: p.text, tasks: [],
+        })),
+      },
+      quote: { materials: [], externals: [], overrides: {} },
+      schedule: [],
+    };
+  },
+
+  save(job) {
+    job.updatedAt = Date.now();
+    localStorage.setItem(job.id, JSON.stringify(job));
+  },
+
+  load(id) {
+    try { return JSON.parse(localStorage.getItem(id) || 'null'); }
+    catch(e) { return null; }
+  },
+
+  getAll() {
+    const pfx = this._pfx();
+    return Object.keys(localStorage)
+      .filter(k => k.startsWith(pfx))
+      .map(k => { try { return JSON.parse(localStorage.getItem(k)); } catch(e) { return null; } })
+      .filter(Boolean)
+      .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+  },
+
+  delete(id) { localStorage.removeItem(id); },
+};
+
 // ── PAGE GUARD ── call at top of any restricted page
 function guardPage(feature) {
   if (!App.canAccess(feature)) {

@@ -2,293 +2,130 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>The/Lab</title>
+<title>The/Lab — Dashboard</title>
 <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+
 <div class="topbar">
   <a class="logo" href="/">THE/LAB</a>
   <div class="sep"></div>
-  <div class="view-switcher" id="view-switcher" style="display:none">
-    <button class="vs-btn" onclick="setViewMode('employee')">Employee</button>
-    <button class="vs-btn" onclick="setViewMode('teamleader')">Team Leader</button>
-    <button class="vs-btn" onclick="setViewMode('admin')">Admin</button>
-  </div>
+  <span style="font-size:11px;color:var(--text2)" id="dash-date"></span>
   <div class="tr-right">
-    <a href="/settings.html" class="btn ghost" id="settings-link" style="text-decoration:none">⚙ Settings</a>
+    <button class="btn" onclick="newJob()">+ New job</button>
+    <a href="/settings.html" class="btn ghost" style="text-decoration:none">⚙</a>
   </div>
 </div>
 
 <nav class="sys-nav">
-  <a href="/" class="sys-nav-item active" id="snav-dash">DASHBOARD</a>
+  <a href="/" class="sys-nav-item active">DASHBOARD</a>
   <span class="sys-nav-sep">/</span>
-  <a href="/process.html" class="sys-nav-item" id="snav-process">PROCESS</a>
-  <span class="sys-nav-sep">/</span>
-  <a href="/estimate.html" class="sys-nav-item" id="snav-estimate">ESTIMATE</a>
-  <span class="sys-nav-sep">/</span>
-  <a href="/jobs.html" class="sys-nav-item" id="snav-jobs">JOB BOARD</a>
+  <a href="/board.html" class="sys-nav-item">BOARD</a>
 </nav>
 
-<div style="overflow-y:auto;height:calc(100vh - 86px)">
-  <div class="dash-wrap">
-
-    <!-- HEADER -->
-    <div class="dash-header">
-      <div class="dash-greeting" id="dash-greeting">THE/LAB</div>
-      <div class="dash-sub" id="dash-sub"></div>
+<div style="padding:20px 24px;overflow-y:auto;height:calc(100vh - 86px)">
+  <div style="margin-bottom:20px;display:flex;align-items:flex-end;justify-content:space-between">
+    <div>
+      <div class="dash-greeting" id="greeting">GOOD MORNING</div>
+      <div class="dash-sub" id="greeting-sub"></div>
     </div>
-
-    <!-- TWO-COLUMN BODY -->
-    <div class="dash-body">
-
-      <!-- LEFT: JOBS THIS WEEK -->
-      <div>
-        <div class="dash-section" id="jobs-section">
-          <div class="dash-section-hdr">
-            <span class="dash-section-title">Jobs this week</span>
-            <a href="/jobs.html" class="btn ghost" style="font-size:11px">Job Board →</a>
-          </div>
-          <div class="dash-job-hdr">
-            <span>Task</span><span>Project</span><span>Ready by</span><span>Status</span>
-          </div>
-          <div id="jobs-week-list"></div>
-        </div>
-      </div>
-
-      <!-- RIGHT: MESSAGE + PROJECTS -->
-      <div>
-        <!-- TEAM LEADER MESSAGE -->
-        <div id="msg-section" style="display:none">
-          <div class="msg-card" id="msg-card">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-              <div class="msg-card-from" id="msg-from">FROM YOUR TEAM LEADER</div>
-              <button class="msg-card-edit" id="msg-edit-btn" onclick="toggleEditMessage()" style="display:none">Edit</button>
-            </div>
-            <div id="msg-display">
-              <p class="msg-card-text" id="msg-text" style="color:var(--text3);font-style:italic">No message from your team leader yet.</p>
-            </div>
-            <div id="msg-edit-form" style="display:none">
-              <textarea class="msg-textarea" id="msg-input" placeholder="Write a message for your team..." rows="3"></textarea>
-              <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end">
-                <button class="btn ghost" onclick="cancelEditMessage()">Cancel</button>
-                <button class="btn primary" onclick="saveMessage()">Save message</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- RECENT PROJECTS -->
-        <div class="dash-section" id="recent-section" style="display:none">
-          <div class="dash-section-hdr">
-            <span class="dash-section-title">Projects</span>
-            <button class="btn ghost" style="font-size:11px" onclick="newProject()">+ New</button>
-          </div>
-          <div id="recent-list"></div>
-        </div>
-      </div>
-
+    <div>
+      <input class="sb-in" id="search-in" placeholder="Search jobs..." oninput="renderPipeline()"
+        style="width:200px;font-size:12px">
     </div>
   </div>
+
+  <div class="dash-pipeline" id="pipeline"></div>
 </div>
 
 <script src="/js/app.js"></script>
 <script>
-(function() {
-  let session = App.getSession();
+'use strict';
 
-  window.onUserReady = render;
+const PIPE_STATUSES = [
+  { key:'inquiry',        label:'Inquiry' },
+  { key:'active',         label:'Active' },
+  { key:'in-production',  label:'In Production' },
+  { key:'delivered',      label:'Delivered' },
+  { key:'invoiced',       label:'Invoiced' },
+];
 
-  function render() {
-    session = App.getSession();
-    const {viewMode, employeeId} = session;
-    const u = App.currentUser;
+function newJob() { window.location.href = '/job.html'; }
 
-    // View switcher: only show for admins
-    const switcher = document.getElementById('view-switcher');
-    if (u && u.isAdmin) {
-      switcher.style.display = '';
-      document.querySelectorAll('.vs-btn').forEach((btn, i) => {
-        btn.classList.toggle('active', ['employee','teamleader','admin'][i] === viewMode);
-      });
-    } else {
-      switcher.style.display = 'none';
-    }
+function openJob(id) { window.location.href = '/job.html?id=' + id; }
 
-    document.getElementById('settings-link').style.display = App.canAccess('settings') ? '' : 'none';
+function newJobWithStatus(status) {
+  const job = Jobs.blank();
+  job.status = status;
+  Jobs.save(job);
+  window.location.href = '/job.html?id=' + job.id;
+}
 
-    const global = App.getGlobal();
-    const employees = global.employees || [];
-    const emp = employees.find(e => e.id === employeeId);
-    const greetingEl = document.getElementById('dash-greeting');
-    const subEl = document.getElementById('dash-sub');
-    const displayName = u ? u.name.split(' ')[0] : (emp ? emp.name.split(' ')[0] : null);
-    if (displayName) {
-      const hour = new Date().getHours();
-      const timeGreet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-      greetingEl.textContent = timeGreet + ', ' + displayName + '.';
-      subEl.textContent = new Date().toLocaleDateString('en-GB', {weekday:'long', day:'numeric', month:'long'});
-    } else {
-      greetingEl.textContent = 'THE/LAB';
-      subEl.textContent = '';
-    }
+function deleteJob(id, e) {
+  e.stopPropagation();
+  if (!confirm('Delete this job? This cannot be undone.')) return;
+  Jobs.delete(id);
+  renderPipeline();
+}
 
-    renderMessage(emp, viewMode, global);
+function renderPipeline() {
+  const q       = (document.getElementById('search-in')?.value || '').toLowerCase().trim();
+  const all     = Jobs.getAll();
+  const matches = q
+    ? all.filter(j => (j.title||'').toLowerCase().includes(q) || (j.client?.name||'').toLowerCase().includes(q))
+    : all;
 
-    const recentSection = document.getElementById('recent-section');
-    if (App.canAccess('estimate') || App.canAccess('process')) {
-      recentSection.style.display = '';
-      renderRecentProjects();
-    } else {
-      recentSection.style.display = 'none';
-    }
-
-    renderJobsThisWeek(emp, viewMode);
-  }
-
-  function renderMessage(emp, viewMode, global) {
-    const msgSection = document.getElementById('msg-section');
-    const depts = global.departments || [];
-    let deptMsg = null, deptName = '';
-    if (emp) {
-      const dept = depts.find(d => d.id === emp.deptId);
-      if (dept) { deptName = dept.name; deptMsg = dept.teamLeaderMessage || ''; }
-    } else if (depts.length > 0 && viewMode !== 'employee') {
-      deptName = depts[0].name; deptMsg = depts[0].teamLeaderMessage || '';
-    }
-    if (deptMsg === null && viewMode === 'employee') { msgSection.style.display = 'none'; return; }
-    msgSection.style.display = '';
-    document.getElementById('msg-from').textContent = deptName ? 'FROM ' + deptName.toUpperCase() + ' — TEAM LEADER' : 'FROM YOUR TEAM LEADER';
-    const msgText = document.getElementById('msg-text');
-    if (deptMsg) {
-      msgText.textContent = deptMsg; msgText.style.color = ''; msgText.style.fontStyle = '';
-    } else {
-      msgText.textContent = 'No message from your team leader yet.';
-      msgText.style.color = 'var(--text3)'; msgText.style.fontStyle = 'italic';
-    }
-    document.getElementById('msg-edit-btn').style.display = App.canAccess('postMessage') ? '' : 'none';
-  }
-
-  function toggleEditMessage() {
-    const display = document.getElementById('msg-display');
-    const form = document.getElementById('msg-edit-form');
-    const inp = document.getElementById('msg-input');
-    const isEditing = form.style.display !== 'none';
-    display.style.display = isEditing ? '' : 'none';
-    form.style.display = isEditing ? 'none' : '';
-    if (!isEditing) {
-      const global = App.getGlobal();
-      const emp = (global.employees || []).find(e => e.id === session.employeeId);
-      const dept = emp ? (global.departments || []).find(d => d.id === emp.deptId) : null;
-      inp.value = (dept && dept.teamLeaderMessage) || '';
-      inp.focus();
-    }
-  }
-
-  function cancelEditMessage() {
-    document.getElementById('msg-display').style.display = '';
-    document.getElementById('msg-edit-form').style.display = 'none';
-  }
-
-  function saveMessage() {
-    const text = document.getElementById('msg-input').value.trim();
-    const global = App.getGlobal();
-    const emp = (global.employees || []).find(e => e.id === session.employeeId);
-    let deptId = emp ? emp.deptId : (global.departments[0] && global.departments[0].id);
-    if (!deptId && global.departments.length) deptId = global.departments[0].id;
-    if (deptId) {
-      const dept = global.departments.find(d => d.id === deptId);
-      if (dept) dept.teamLeaderMessage = text;
-    }
-    App.saveGlobal(global);
-    cancelEditMessage();
-    render();
-  }
-
-  function renderRecentProjects() {
-    const list = document.getElementById('recent-list');
-    const projects = App.getSavedProjects().slice(0, 8);
-    if (!projects.length) {
-      list.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:8px 0">No saved projects yet.</div>';
-      return;
-    }
-    list.innerHTML = projects.map(p => {
-      const saved = p.savedAt ? new Date(p.savedAt).toLocaleDateString('en-GB', {day:'numeric',month:'short'}) : '';
-      return `<div class="proj-card" onclick="openProject('${p._key}')">
-        <div style="flex:1;min-width:0">
-          <div class="proj-card-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.name||'Untitled')}</div>
-          <div class="proj-card-meta">${[esc(p.client||''), esc(p.version||'')].filter(Boolean).join(' · ')}</div>
+  document.getElementById('pipeline').innerHTML = PIPE_STATUSES.map(st => {
+    const jobs  = matches.filter(j => j.status === st.key);
+    const cards = jobs.map(j => {
+      const depts = (j.departments||[]).slice(0,3).join(', ');
+      const dates = (j.dateStart || j.dateEnd) ? fmtDateRange(j.dateStart, j.dateEnd) : '';
+      return `<div class="pipe-job" onclick="openJob('${j.id}')">
+        ${j.client?.name ? `<div class="pipe-job-client">${esc(j.client.name)}</div>` : ''}
+        <div class="pipe-job-title">${esc(j.title || 'Untitled job')}</div>
+        <div class="pipe-job-meta">
+          ${dates ? `<span>${dates}</span>` : ''}
+          ${depts ? `<span>${esc(depts)}</span>` : ''}
         </div>
-        ${saved ? `<div class="proj-card-meta">${saved}</div>` : ''}
-        <div class="proj-card-status">${esc(p.status||'active')}</div>
       </div>`;
     }).join('');
+
+    return `<div class="pipe-col">
+      <div class="pipe-col-hdr">
+        <span>${st.label}</span>
+        ${jobs.length ? `<span class="pipe-count">${jobs.length}</span>` : ''}
+      </div>
+      ${cards}
+      <button class="pipe-new-btn" onclick="newJobWithStatus('${st.key}')">+ New</button>
+    </div>`;
+  }).join('');
+}
+
+function initGreeting() {
+  const now  = new Date();
+  const h    = now.getHours();
+  const word = h < 12 ? 'MORNING' : h < 17 ? 'AFTERNOON' : 'EVENING';
+  document.getElementById('greeting').textContent = 'GOOD ' + word;
+  document.getElementById('dash-date').textContent =
+    now.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' });
+  const active = Jobs.getAll().filter(j => j.status === 'active' || j.status === 'in-production');
+  document.getElementById('greeting-sub').textContent = active.length
+    ? active.length + ' job' + (active.length > 1 ? 's' : '') + ' active.'
+    : 'No active jobs.';
+}
+
+window.onUserReady = function() {
+  const u = App.currentUser;
+  if (u?.name) {
+    const name = u.name.split(' ')[0].toUpperCase();
+    const h    = new Date().getHours();
+    const word = h < 12 ? 'MORNING' : h < 17 ? 'AFTERNOON' : 'EVENING';
+    document.getElementById('greeting').textContent = 'GOOD ' + word + ', ' + name;
   }
+};
 
-  function openProject(key) {
-    const d = App.loadProjectByKey(key);
-    if (!d) return;
-    App.saveDraft({
-      key, name:d.name||'', client:d.client||'', version:d.version||'V1',
-      date:d.date||'', currency:d.currency||'DKK', status:d.status||'active',
-    }, d.S);
-    window.location.href = '/process.html';
-  }
-
-  function renderJobsThisWeek(emp, viewMode) {
-    const jobsSection = document.getElementById('jobs-section');
-    const list = document.getElementById('jobs-week-list');
-    const projects = App.getSavedProjects();
-    const now = new Date();
-    const weekStart = new Date(now); weekStart.setDate(now.getDate() - now.getDay() + 1); weekStart.setHours(0,0,0,0);
-    const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6); weekEnd.setHours(23,59,59,999);
-
-    const thisWeek = [];
-    projects.forEach(p => {
-      (p.jobTasks || []).forEach(jt => {
-        const dates = [];
-        if (jt.readyByDate) dates.push(jt.readyByDate);
-        const stages = jt.stages || {};
-        Object.values(stages).forEach(s => {
-          if (s.enabled) {
-            if (s.startDate) dates.push(s.startDate);
-            if (s.endDate) dates.push(s.endDate);
-            if (s.date) dates.push(s.date);
-          }
-        });
-        const inWeek = dates.some(d => { const dd = new Date(d); return dd >= weekStart && dd <= weekEnd; });
-        const assignedToMe = !emp || (jt.assignedTo || []).some(a => a.employeeId === emp.id || a.name === emp.name);
-        if (inWeek && (viewMode !== 'employee' || assignedToMe)) {
-          thisWeek.push({...jt, projectName: p.name||'Untitled', projectKey: p._key});
-        }
-      });
-    });
-
-    if (!thisWeek.length) {
-      list.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:10px 10px">No jobs this week.</div>';
-      return;
-    }
-
-    const statusLabel = {upcoming:'Upcoming', 'in-progress':'In Progress', done:'Done'};
-    const statusColor = {upcoming:'var(--text3)', 'in-progress':'var(--accent)', done:'#9fe1cb'};
-    list.innerHTML = thisWeek.map(jt => {
-      const ready = jt.readyByDate ? new Date(jt.readyByDate).toLocaleDateString('en-GB', {day:'numeric',month:'short'}) : '—';
-      const st = jt.status || 'upcoming';
-      return `<div class="dash-job-row" onclick="window.location.href='/jobs.html'">
-        <span style="color:var(--hi);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(jt.name)}</span>
-        <span style="color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(jt.projectName)}</span>
-        <span style="color:var(--text2)">${ready}</span>
-        <span style="color:${statusColor[st]||'var(--text3)'}">${statusLabel[st]||st}</span>
-      </div>`;
-    }).join('');
-  }
-
-  window.newProject = function() { window.location.href = '/process.html'; };
-  window.setViewMode = function(mode) { session.viewMode = mode; App.saveSession(session); render(); };
-  window.toggleEditMessage = toggleEditMessage;
-  window.cancelEditMessage = cancelEditMessage;
-  window.saveMessage = saveMessage;
-  window.openProject = openProject;
-})();
+initGreeting();
+renderPipeline();
 </script>
 </body>
 </html>

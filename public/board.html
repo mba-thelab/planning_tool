@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The/Lab — Operations Board</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="logo" href="/">THE/LAB</a>
+  <div class="sep"></div>
+  <span style="font-size:11px;color:var(--text2)">Operations Board</span>
+  <div class="tr-right">
+    <a href="/settings.html" class="btn ghost" style="text-decoration:none">⚙</a>
+  </div>
+</div>
+
+<nav class="sys-nav">
+  <a href="/" class="sys-nav-item">DASHBOARD</a>
+  <span class="sys-nav-sep">/</span>
+  <a href="/board.html" class="sys-nav-item active">BOARD</a>
+</nav>
+
+<div style="display:flex;flex-direction:column;height:calc(100vh - 86px)">
+  <!-- Toolbar -->
+  <div class="board-toolbar">
+    <div class="board-week-nav">
+      <button class="btn ghost" onclick="prevWeek()">←</button>
+      <span class="board-week-lbl" id="week-lbl"></span>
+      <button class="btn ghost" onclick="nextWeek()">→</button>
+      <button class="btn ghost" style="font-size:11px" onclick="goToday()">Today</button>
+    </div>
+    <div class="sep"></div>
+    <div class="view-switcher">
+      <button class="vs-btn active" id="vbtn-grid" onclick="setView('grid')">Studio grid</button>
+      <button class="vs-btn" id="vbtn-list" onclick="setView('list')">All jobs</button>
+    </div>
+    <div class="sep"></div>
+    <input class="sb-in" id="board-filter" placeholder="Filter by job or client..."
+      oninput="renderBoard()" style="width:200px;font-size:12px">
+  </div>
+
+  <!-- Board content -->
+  <div id="board-content" class="board-grid"></div>
+</div>
+
+<script src="/js/app.js"></script>
+<script src="/js/board.js"></script>
+</body>
+</html>
